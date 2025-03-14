@@ -1,0 +1,69 @@
+generator client {
+provider = "prisma-client-js"
+}
+datasource db {
+provider = "postgresql"
+url = env("POSTGRES_PRISMA_URL")
+directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Country {
+  id                     String      @id @default(cuid())
+  countryName            String   @db.VarChar(11)
+  countryCodeShort       String   @db.VarChar(3)
+  continent              String   @db.VarChar(13)
+
+  footballClubs          FootballClub[]
+  leagues                League[]       
+}
+
+model FootballClub {
+  id                     String      @id @default(cuid())
+  clubName               String   @db.VarChar(19)
+  foundationYear         String
+  city                   String   @db.VarChar(17)
+  countryid              String?   
+  leagueid               String?   
+
+  country                Country?  @relation(fields: [countryid], references: [id])
+  league                 League?   @relation(fields: [leagueid], references: [id])
+  matchesAsAwayClub      Match[]  @relation("AwayClubToMatch")
+  matchesAsHomeClub      Match[]  @relation("HomeClubToMatch")
+  players                Player[]
+}
+
+model League {
+  id              String      @id @default(cuid())
+  leagueName            String   @db.VarChar(22)
+  leagueLevel           String
+  countryid             String? 
+
+  country               Country?  @relation(fields: [countryid], references: [id])
+  footballClubs         FootballClub[] @relation()
+  matches               Match[]
+}
+
+model Match {
+  id                    String      @id @default(cuid())
+  season                String   @db.VarChar(5)
+  matchDate             String
+  scoreHomeAway         String   @db.VarChar(3)
+  idAwayClub            String?   
+  idHomeClub            String?   
+  idLeague              String?
+
+  league                League? @relation(fields: [idLeague], references: [id])
+  awayClub              FootballClub? @relation("AwayClubToMatch", fields: [idAwayClub], references: [id])
+  homeClub              FootballClub? @relation("HomeClubToMatch", fields: [idHomeClub], references: [id])
+}
+
+model Player {
+  id                    String      @id @default(cuid())
+  name                  String   @db.VarChar(18)
+  position              String   @db.VarChar(6)
+  birthdayDate          String
+  clubId                String?
+
+
+  footballClubRelation  FootballClub? @relation(fields: [clubId], references: [id])
+}
