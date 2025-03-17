@@ -6,7 +6,7 @@ import {
   TextInput,
   Select,
 } from '@mantine/core';
-import { IconPlayFootball, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconFlagCog, IconPlayFootball, IconPlus, IconShieldCog, IconShirtSport, IconSoccerField, IconTrash } from '@tabler/icons-react';
 
 export default function Page2() {
 
@@ -178,7 +178,7 @@ export default function Page2() {
         <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать страны</h1>
-            <IconPlayFootball />
+            <IconFlagCog />
           </div>
           <div className="flex flex-col mt-4">
             <Button
@@ -206,7 +206,7 @@ export default function Page2() {
         <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать лиги</h1>
-            <IconPlayFootball />
+            <IconShieldCog />
           </div>
           <div className="flex flex-col mt-4">
             <Button
@@ -235,7 +235,7 @@ export default function Page2() {
         <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать футбольные команды</h1>
-            <IconPlayFootball />
+            <IconShirtSport />
           </div>
           <div className="flex flex-col mt-4">
             <Button
@@ -263,7 +263,7 @@ export default function Page2() {
         <div className="bg-white shadow-md p-4 rounded-lg w-1/3 ">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать футбольные матчи</h1>
-            <IconPlayFootball />
+            <IconSoccerField/>
           </div>
           <div className="flex flex-col mt-4">
             <Button
@@ -286,6 +286,9 @@ export default function Page2() {
               Удалить матч
             </Button>
           </div>
+        </div>
+        <div className='w-1/3'>
+
         </div>
       </div>
 
