@@ -1,5 +1,6 @@
 import { Button, Pagination, Select } from "@mantine/core";
 import { IconBuildingStadium } from "@tabler/icons-react";
+import React from "react";
 
 export default function Seachbymatch() {
     return (

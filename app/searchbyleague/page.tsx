@@ -1,5 +1,5 @@
 import { Button, Pagination, Select } from "@mantine/core";
-
+import React from "react";
 import { IconBuildingStadium } from "@tabler/icons-react";
 
 export default function Seachbyleague() {
