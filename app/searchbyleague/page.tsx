@@ -1,6 +1,7 @@
-import { Button, Pagination, Select } from "@mantine/core";
+import { Button, Pagination, Select,Input } from "@mantine/core";
+import React from "react";
+import { IconBuildingStadium, IconSearch } from "@tabler/icons-react";
 
-import { IconBuildingStadium } from "@tabler/icons-react";
 
 export default function Seachbyleague() {
     return (
@@ -8,11 +9,15 @@ export default function Seachbyleague() {
             <h1 className="text-2xl font-bold mb-4">Поиск по лиге и стране</h1>
             <div className="bg-white shadow-md p-4 rounded-lg">
                 <div className="flex justify-between items-center">
-                    
-                    <Select placeholder="Выбрать лигу" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать уровень лиги" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать страну" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать континент" className="w-1/4" />
+                    <Input
+                        rightSection={<IconSearch />}
+                        placeholder="Поиск по лиге..."
+                        className="w-1/3 mr-2"
+                    />
+                    <Select placeholder="Выбрать лигу" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать уровень лиги" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать страну" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать континент" className="w-1/6" />
                 </div>
             </div>
 

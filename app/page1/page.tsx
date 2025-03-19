@@ -1,5 +1,6 @@
 import { Button, Pagination, Select } from "@mantine/core";
 import { Input } from "@mantine/core";
+import React from "react";
 import { IconSearch, IconBuildingStadium } from "@tabler/icons-react";
 
 export default function Page1() {

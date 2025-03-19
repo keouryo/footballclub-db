@@ -6,6 +6,7 @@ import {
   TextInput,
   Select,
 } from '@mantine/core';
+import React from 'react';
 import { IconFlagCog, IconPlayFootball, IconPlus, IconShieldCog, IconShirtSport, IconSoccerField, IconTrash } from '@tabler/icons-react';
 
 export default function Page2() {
