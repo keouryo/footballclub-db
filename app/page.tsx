@@ -1,6 +1,6 @@
 'use client'
 import { PieChart } from "@mantine/charts";
-import { Button } from "@mantine/core";
+import { Button, Table,Title } from "@mantine/core";
 import {
   IconBabyCarriageFilled,
   IconBellHeart,
@@ -28,8 +28,34 @@ const Home: React.FC = () => {
   const data =
   response?.data.map(item => ({
     label: item.countryName,
+    league: item.leagueName,
     value: item._count.footballClubs,
   })) ?? [];
+   // Преобразование данных для второй таблицы (лиги)
+   const leagueData =
+   response?.data.flatMap(item =>
+     item.leagues.map(league => ({
+       label: league.leagueName,
+       value: league._count.footballClubs,
+     }))
+   ) ?? [];
+
+ // Генерация строк для таблицы со странами
+ const countryRows = data.map((item) => (
+   <Table.Tr key={item.label}>
+     <Table.Td className="font-medium">{item.label}</Table.Td>
+     <Table.Td>{item.value}</Table.Td>
+   </Table.Tr>
+ ));
+
+ // Генерация строк для таблицы с лигами
+ const leagueRows = leagueData.map((item) => (
+   <Table.Tr key={item.label}>
+     <Table.Td className="font-medium">{item.label}</Table.Td>
+     <Table.Td>{item.value}</Table.Td>
+   </Table.Tr>
+ ));
+
   return (
     
     <div className="pt-5 pl-4">
@@ -40,25 +66,39 @@ const Home: React.FC = () => {
 
       {/* Блок статистики по странам и лигам */}
       <div className="flex justify-center mt-8">
-        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md mr-4">
-          <div className="flex items-center mb-4 mr-4">
-            <IconFlag />
-            <h2 className="text-xl">Статистика по странам:</h2>
-  
-          </div>
-          <div className="bg-gray-200 h-64 ">
-          {data?.map((item) => <span key={item.label}>{item.label}  {item.value}</span> )}
-          </div>
+      <div className="w-1/2 p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center mb-4">
+          <IconFlag />
+          <Title order={3} className="ml-2">
+            Статистика по странам:
+          </Title>
         </div>
+
+        <Table striped highlightOnHover withTableBorder withColumnBorders>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Страна</Table.Th>
+              <Table.Th>Количество клубов</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{countryRows}</Table.Tbody>
+        </Table>
+      </div>
 
         <div className="w-1/2 p-4 bg-white rounded-lg shadow-md ml-4">
           <div className="flex items-center mb-4">
             <IconTrophy className="mr-2" />
             <h2 className="text-xl">Статистика по лигам:</h2>
           </div>
-          <div className="bg-gray-200 h-64 flex items-center justify-center">
-            <p>Клубов в лиге</p>
-          </div>
+          <Table striped highlightOnHover withTableBorder withColumnBorders>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Лига</Table.Th>
+                <Table.Th>Количество клубов</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{leagueRows}</Table.Tbody>
+          </Table>
         </div>
       </div>
 

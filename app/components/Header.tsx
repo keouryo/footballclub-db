@@ -34,17 +34,14 @@ export default function Header(){
             {/* Выпадающее меню */}
             <Menu.Dropdown>
                 {/* Элементы меню */}
-                <Menu.Item>
-                    <Select
-                        label=""
-                        placeholder="Выберите критерий"
-                        data={[
-                            'Поиск по клубу',
-                            'Поиск по лиге и стране',
-                            'Поиск матчей',
-                        ]}
-                        comboboxProps={{ withinPortal: false }}
-                    />
+                <Menu.Item component={Link} href={'/page1'}>
+                Поиск по клубу
+                </Menu.Item>
+                <Menu.Item component={Link} href={'/searchbyleague'}>
+                Поиск по лиге
+                </Menu.Item>
+                <Menu.Item component={Link} href={'/searchbymatch'}>
+                Поиск по матчу
                 </Menu.Item>
             </Menu.Dropdown>
         </Menu>

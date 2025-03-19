@@ -1,5 +1,5 @@
-import { Button, Pagination, Select } from "@mantine/core";
-import { IconBuildingStadium } from "@tabler/icons-react";
+import { Button, Input, Pagination, Select } from "@mantine/core";
+import { IconBuildingStadium, IconSearch } from "@tabler/icons-react";
 import React from "react";
 
 export default function Seachbymatch() {
@@ -9,10 +9,15 @@ export default function Seachbymatch() {
 
             <div className="bg-white shadow-md p-4 rounded-lg">
                 <div className="flex justify-between items-center">
-                    <Select placeholder="Год матча" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать сезон" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать лигу" className="w-1/4 mr-2" />
-                    <Select placeholder="Выбрать команду" className="w-1/4" />
+                    <Input
+                        rightSection={<IconSearch />}
+                        placeholder="Введите название клуба..."
+                        className="w-1/3 mr-2"
+                    />
+                    <Select placeholder="Год матча" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать сезон" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать лигу" className="w-1/6 mr-2" />
+                    <Select placeholder="Выбрать команду" className="w-1/6" />
                 </div>
             </div>
 
