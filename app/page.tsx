@@ -20,44 +20,34 @@ import React from "react";
 
 // Определяем тип для компонента (в данном случае пропсов нет)
 const Home: React.FC = () => {
-  const {data:response} = useQuery({queryKey:['getstatistics'],queryFn:() => {
-    return fetch('/api/statistics').then(res => res.json())
-  }})
-  console.log(response)
+  const { data: response } = useQuery({
+    queryKey: ['getstatistics'],
+    queryFn: () => fetch('/api/statistics').then(res => res.json())
+  });
 
-  const data =
-  response?.data.map(item => ({
-    label: item.countryName,
-    league: item.leagueName,
-    value: item._count.footballClubs,
-  })) ?? [];
-   // Преобразование данных для второй таблицы (лиги)
-   const leagueData =
-   response?.data.flatMap(item =>
-     item.leagues.map(league => ({
-       label: league.leagueName,
-       value: league._count.footballClubs,
-     }))
-   ) ?? [];
+  if (!response) return <div>Loading...</div>;
 
- // Генерация строк для таблицы со странами
- const countryRows = data.map((item) => (
-   <Table.Tr key={item.label}>
-     <Table.Td className="font-medium">{item.label}</Table.Td>
-     <Table.Td>{item.value}</Table.Td>
-   </Table.Tr>
- ));
+  const { countriesData, playersStats, totalLeagues, youngestPlayer, youngestClub, latestMatch, highestScoreMatch } = response;
 
- // Генерация строк для таблицы с лигами
- const leagueRows = leagueData.map((item) => (
-   <Table.Tr key={item.label}>
-     <Table.Td className="font-medium">{item.label}</Table.Td>
-     <Table.Td>{item.value}</Table.Td>
-   </Table.Tr>
- ));
+  // Преобразование данных для таблицы со странами
+  const countryRows = countriesData.map((item) => (
+    <Table.Tr key={item.countryName}>
+      <Table.Td className="font-medium">{item.countryName}</Table.Td>
+      <Table.Td>{item._count.footballClubs}</Table.Td>
+    </Table.Tr>
+  ));
+
+  // Преобразование данных для таблицы с лигами
+  const leagueRows = countriesData.flatMap(item =>
+    item.leagues.map(league => (
+      <Table.Tr key={league.leagueName}>
+        <Table.Td className="font-medium">{league.leagueName}</Table.Td>
+        <Table.Td>{league._count.footballClubs}</Table.Td>
+      </Table.Tr>
+    ))
+  );
 
   return (
-    
     <div className="pt-5 pl-4">
       {/* Заголовок */}
       <div className="text-2xl flex justify-center">
@@ -66,30 +56,35 @@ const Home: React.FC = () => {
 
       {/* Блок статистики по странам и лигам */}
       <div className="flex justify-center mt-8">
-      <div className="w-1/2 p-4 bg-white rounded-lg shadow-md">
-        <div className="flex items-center mb-4">
-          <IconFlag />
-          <Title order={3} className="ml-2">
-            Статистика по странам:
-          </Title>
+        {/* Таблица со странами */}
+        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md">
+          <div className="flex items-center mb-6">
+            <IconFlag />
+            <Title order={3} className="ml-2">
+              Статистика по странам:
+            </Title>
+          </div>
+
+          <Table striped highlightOnHover withTableBorder withColumnBorders >
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Страна</Table.Th>
+                <Table.Th>Количество клубов</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{countryRows}</Table.Tbody>
+          </Table>
         </div>
 
-        <Table striped highlightOnHover withTableBorder withColumnBorders>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Страна</Table.Th>
-              <Table.Th>Количество клубов</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>{countryRows}</Table.Tbody>
-        </Table>
-      </div>
-
+        {/* Таблица с лигами */}
         <div className="w-1/2 p-4 bg-white rounded-lg shadow-md ml-4">
           <div className="flex items-center mb-4">
             <IconTrophy className="mr-2" />
-            <h2 className="text-xl">Статистика по лигам:</h2>
+            <Title order={3} className="ml-2">
+              Статистика по лигам:
+            </Title>
           </div>
+
           <Table striped highlightOnHover withTableBorder withColumnBorders>
             <Table.Thead>
               <Table.Tr>
@@ -110,7 +105,7 @@ const Home: React.FC = () => {
         </div>
         <div className="flex justify-between">
           <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/3">
-            <h2 className="text-3xl">12</h2>
+            <h2 className="text-3xl">{playersStats._count.id}</h2>
             <div className="flex items-center">
               <IconUsers />
               <p className="ml-2 text-lg">Количество игроков</p>
@@ -126,7 +121,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/3">
-            <h2 className="text-3xl">12</h2>
+            <h2 className="text-3xl">{totalLeagues}</h2>
             <div className="flex items-center">
               <IconTrophy />
               <p className="ml-2 text-lg">Количество лиг</p>
@@ -147,9 +142,9 @@ const Home: React.FC = () => {
             <div className="flex items-center">
               <IconBabyCarriageFilled className="size-10" />
               <div>
-                <p className="text-lg">Kobbie Mainoo</p>
+                <p className="text-lg">{youngestPlayer?.name}</p>
                 <div>
-                  <p className="text-lg">2003</p>
+                  <p className="text-lg">{youngestPlayer?.birthdayDate}</p>
                 </div>
               </div>
             </div>
@@ -160,9 +155,9 @@ const Home: React.FC = () => {
             <div className="flex items-center">
               <IconShieldHalfFilled className="size-10" />
               <div>
-                <p className="text-lg">RB Leipzig</p>
+                <p className="text-lg">{youngestClub?.clubName}</p>
                 <div>
-                  <p className="text-lg">2006</p>
+                  <p className="text-lg">{youngestClub?.foundationYear}</p>
                 </div>
               </div>
             </div>
@@ -173,9 +168,9 @@ const Home: React.FC = () => {
             <div className="flex items-center">
               <IconSoccerField className="size-10" />
               <div>
-                <p className="text-lg">Liverpool vs Arsenal</p>
+                <p className="text-lg">{latestMatch?.homeClub.clubName} vs {latestMatch?.awayClub.clubName}</p>
                 <div>
-                  <p className="text-lg">2-2(16.03.2025)</p>
+                  <p className="text-lg">{latestMatch?.scoreHomeAway} ({latestMatch?.matchDate})</p>
                 </div>
               </div>
             </div>
@@ -186,9 +181,9 @@ const Home: React.FC = () => {
             <div className="flex items-center">
               <IconScoreboard className="size-10" />
               <div>
-                <p className="text-lg">Barcelona vs Real Madrid</p>
+                <p className="text-lg">{highestScoreMatch?.homeClub.clubName} vs {highestScoreMatch?.awayClub.clubName}</p>
                 <div>
-                  <p className="text-lg">5-1 (16.02.2025)</p>
+                  <p className="text-lg">{highestScoreMatch?.scoreHomeAway} ({highestScoreMatch?.matchDate})</p>
                 </div>
               </div>
             </div>
