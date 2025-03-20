@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -62,4 +62,18 @@ export async function GET(req: Request) {
     console.error(error)  // Логируем ошибку для диагностики
     return NextResponse.json({ error: 'Ошибка на сервере' }, { status: 500 })
   }
+}
+
+
+export const POST = async(request: NextRequest)=> {
+    const {leagueName,leagueLevel,countryName} = await request.json()
+
+    const data = await prisma.league.create({data:{
+      leagueName:countryName,
+      leagueLevel:leagueLevel,
+      countryid:countryName,
+    }})
+
+    return NextResponse.json({data},{status: 200})
+    
 }

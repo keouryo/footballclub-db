@@ -57,7 +57,7 @@ const Home: React.FC = () => {
       {/* Блок статистики по странам и лигам */}
       <div className="flex justify-center mt-8">
         {/* Таблица со странами */}
-        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md">
+        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md h-auto">
           <div className="flex items-center mb-6">
             <IconFlag />
             <Title order={3} className="ml-2">
