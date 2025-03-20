@@ -42,11 +42,22 @@ export async function GET(req: Request) {
     const leagues = await prisma.league.findMany({
       where: filters,
       include: {
-        country: true
-      }
+        country: true,
+        _count: {
+          select: {
+            footballClubs: true, // Подсчитываем количество футбольных клубов
+          },
+        },
+      },
     })
 
-    return NextResponse.json(leagues)
+    // Преобразуем результаты, чтобы добавить поле clubCount
+    const formattedLeagues = leagues.map((league) => ({
+      ...league,
+      clubCount: league._count.footballClubs, // Количество клубов
+    }))
+
+    return NextResponse.json(formattedLeagues)
   } catch (error) {
     console.error(error)  // Логируем ошибку для диагностики
     return NextResponse.json({ error: 'Ошибка на сервере' }, { status: 500 })

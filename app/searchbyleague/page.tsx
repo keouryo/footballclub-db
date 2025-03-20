@@ -1,5 +1,6 @@
 'use client'
 
+
 import React, { useEffect, useState } from 'react'
 import { Button, Pagination, Select, Input, Loader } from '@mantine/core'
 import { IconBuildingStadium, IconSearch } from '@tabler/icons-react'
@@ -84,9 +85,6 @@ export default function SearchByLeague() {
     }
   }
 
-
-
-
   const handleCountryFilter = (leagueLevel: string) => {
     setSelectedLeagueLevel(leagueLevel)
 
@@ -141,7 +139,7 @@ export default function SearchByLeague() {
 
   const handleSearch = async () => {
     setIsLoading(true);
-  
+
     try {
       console.log('Search parameters:', {
         search: searchValue,
@@ -150,7 +148,7 @@ export default function SearchByLeague() {
         countryId: selectedCountry,
         continent: selectedContinent,
       });
-  
+
       const response = await axios.get('/api/leagues', {
         params: {
           search: searchValue,
@@ -160,7 +158,7 @@ export default function SearchByLeague() {
           continent: selectedContinent,
         },
       });
-  
+
       setResults(response.data);
     } catch (error) {
       console.error('Ошибка при поиске лиг', error);
@@ -242,23 +240,24 @@ export default function SearchByLeague() {
             </div>
 
             <div className="space-y-4">
-              {results.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex items-center p-4 bg-white shadow-md rounded-lg"
-                >
-                  <IconBuildingStadium className="size-12 opacity-50 mr-4" />
+            {results.map((item: any) => (
+  <div
+    key={item.id}
+    className="p-4 bg-white shadow-md rounded-lg"
+  >
+    <div className="flex items-center">
+      <IconBuildingStadium className="size-12 opacity-50 mr-4" />
+      <p className="text-lg font-bold">{item.leagueName}</p>
+    </div>
 
-                  <div>
-                    <p className="text-lg font-bold">{item.leagueName}</p>
-                    <p className="text-sm text-gray-600">
-                      Страна: {item.country.countryName} | Уровень лиги:{' '}
-                      {item.leagueLevel} | Континент:{' '}
-                      {item.country.continent}
-                    </p>
-                  </div>
-                </div>
-              ))}
+    <div className="mt-2 text-sm text-gray-600">
+      Страна: {item.country?.countryName || 'Неизвестно'} | 
+      Уровень лиги: {item.leagueLevel} | 
+      Континент: {item.country?.continent || 'Неизвестно'} | 
+      Количество клубов: {item.clubCount || 0}
+    </div>
+  </div>
+))}
 
               {/* Пагинация (заглушка) */}
               <div className="flex justify-center mt-4">
