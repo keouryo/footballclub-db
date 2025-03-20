@@ -24,7 +24,11 @@ const geistMono = Geist_Mono({
 
 
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const [client] = useState(new QueryClient());
 
   return (

@@ -8,14 +8,39 @@ import {
 } from '@mantine/core';
 import React from 'react';
 import { IconFlagCog, IconPlayFootball, IconPlus, IconShieldCog, IconShirtSport, IconSoccerField, IconTrash } from '@tabler/icons-react';
+import axios from 'axios';
+
+const CreateMatch = async ({season, matchDate, scoreHomeAway, idAwayClub,idHomeClub}:{season:string,matchDate:string, scoreHomeAway:string,idAwayClub?:string,idHomeClub?:string  }) => {
+  const data = await axios.post('api/matches', {season, matchDate, scoreHomeAway, idAwayClub,idHomeClub})
+
+  console.log(data)
+}
+
+const CreateCountry = async ({countryName,countryCodeShort,continent}:{countryName:string, countryCodeShort:string,continent:string}) => {
+  const data = await axios.post('api/coutries', {countryName,countryCodeShort,continent})
+  console.log(data)
+}
+const CreateFootballClub = async ({clubName,
+  foundationYear,
+  city,
+  clubCountry,
+}:{clubName:string, foundationYear:string, city:string, clubCountry:string}) =>{
+  const data = await axios.post('api/clubs', {clubName,foundationYear,city,clubCountry})
+}
+
 
 export default function Page2() {
+ 
+
 
   const [leagueModalOpened, setLeagueModalOpened] = useState(false);
   const [countryModalOpened, setCountryModalOpened] = useState(false);
   const [playerModalOpened, setPlayerModalOpened] = useState(false);
   const [clubModalOpened, setClubModalOpened] = useState(false);
   const [matchModalOpened, setMatchModalOpened] = useState(false);
+
+
+  const [leagueLevel, setleagueLevel] = useState('');
 
 
   const [countryName, setCountryName] = useState('');
@@ -42,12 +67,11 @@ export default function Page2() {
 
  
   const continentOptions = [
-    { value: 'Africa', label: 'Африка' },
-    { value: 'Asia', label: 'Азия' },
-    { value: 'Europe', label: 'Европа' },
-    { value: 'North America', label: 'Северная Америка' },
-    { value: 'South America', label: 'Южная Америка' },
-    { value: 'Oceania', label: 'Океания' },
+    { value: 'Africa', label: 'Africa' },
+    { value: 'Asia', label: 'Asia' },
+    { value: 'Europe', label: 'Europe' },
+    { value: 'North America', label: 'North America' },
+    { value: 'South America', label: 'South America' },
   ];
 
   const positionOptions = [
@@ -64,32 +88,77 @@ export default function Page2() {
   ];
 
   const clubOptions = [
-    { value: 'Manchester United', label: 'Manchester United' },
-    { value: 'Real Madrid', label: 'Real Madrid' },
-    { value: 'Bayern Munich', label: 'Bayern Munich' },
-    { value: 'Paris Saint-Germain', label: 'Paris Saint-Germain' },
-    { value: 'Juventus', label: 'Juventus' },
+    { value: 'cm895fki90000c1a83axxizg', label: 'Liverpool' },
+    { value: 'cm895fkia0001c1a8sg0udma6', label: 'Arsenal' },
+    { value: 'cm895fkib0002c1a8ryrxwiss', label: 'Manchester City' },
+    { value: 'cm895fkib0003c1a83b2xqqvx', label: 'Chelsea' },
+    { value: 'cm895fkic0004c1a85jt9equ', label: 'Newcastle United' },
+    { value: 'cm895fkid0005c1a8fhe2pcy', label: 'Fullham' },
+    { value: 'cm895fkid0006c1a8y2olt1r7', label: 'Tottenham' },
+    { value: 'cm895fkid0007c1a8fv33zdxq', label: 'Everton' },
+    { value: 'cm895fkie0008c1a8orrlo72s', label: 'Manchester United' },
+    { value: 'cm895fkie0009c1a84fanisfz', label: 'Aston Villa' },
+    { value: 'cm895zdgf0000c1xgc16nn6v', label: 'Real Madrid' },
+    { value: 'cm895zdggh0002c1xgyjoh8m1', label: 'Barcelona' },
+    { value: 'cm895zdh0003c1xgwet89qv9', label: 'Sevilla' },
+    { value: 'cm895zdg0004c1xgzpr0fiij7', label: 'Villarreal' },
+    { value: 'cm895zdg0005c1xgfvr4z7y', label: 'Athletic Bilbao' },
+    { value: 'cm895cg7r0007c1xgn0s0n8z', label: 'Bayern Munich' },
+    { value: 'cm895cg7r0008c1xgjxd43h0', label: 'Bayer Leverkusen' },
+    { value: 'cm895cg7s0009c1xge5jei9s2', label: 'Eintracht Frankfurt' },
+    { value: 'cm895cg7s000ac1xg3syxp1c4', label: 'RB Leipzig' },
+    { value: 'cm895cg7t000bc1xgtgpwvo5q7', label: 'Wolfsburg' },
+    { value: 'cm8969gku000dc1xgrm19rcu', label: 'Napoli' },
+    { value: 'cm8969gv000ec1xg9hnnz7f2', label: 'Inter Milan' },
+    { value: 'cm8969gkv000fc1xgi08uy6dx', label: 'Atalanta' },
+    { value: 'cm8969gkw000gc1xg1n9ukbtr', label: 'Lazio' },
+    { value: 'cm8969gkw000hc1xgsh13q525', label: 'Juventus' },
+    { value: 'cm8969gkw000ic1xgoox2dqij7', label: 'AFC Milan' },
+    { value: 'cm896cpm7000kc1xgfvo903gb', label: 'Paris Saint-Germain' },
+    { value: 'cm896cpm8000lc1xgbxickpnnp', label: 'Marseille' },
+    { value: 'cm896cpm8000mc1xg3sdgndgm', label: 'Monaco' },
+    { value: 'cm896cpm8000nc1xghkg37nhna', label: 'Nice' },
+    { value: 'cm896cpm8000oc1xg9icml5dr', label: 'Lyon' },
+    { value: 'cm896frnn000qc1xg1tcn6f35', label: 'Cologne' },
+    { value: 'cm896frnn000rc1xgtx22wd4v', label: 'Hamburg' },
+    { value: 'cm896frno000sc1xgy8csjb1', label: 'Fortuna Düsseldorf' },
+    { value: 'cm896frno000tc1xgs0t1p0c8', label: 'Hertha Berlin' },
+    { value: 'cm896izgy000uc1xgfek74our', label: 'Sheffield United' },
+    { value: 'cm896izgz000vc1xg3xadwwnl', label: 'Leeds United' },
+    { value: 'cm896izgz000wc1xgh6giyo4w', label: 'Burnley' },
+    { value: 'cm896izh0000xc1xgnk5v0913', label: 'Sunderland' },
+    { value: 'cm896izh1000yc1xg9viweic', label: 'Queens Park Rangers' },
+    { value: 'cm896ioht000zc1xgm8tigbti', label: 'Genk' },
   ];
 
   const countryOptions = [
-    { value: 'England', label: 'England' },
-    { value: 'Spain', label: 'Spain' },
-    { value: 'Germany', label: 'Germany' },
-    { value: 'Italy', label: 'Italy' },
-    { value: 'France', label: 'France' },
+    { value: 'cm895i5kn000uc1a8dzf57rvr', label: 'England' },
+  { value: 'cm8960h24000c1xgzwpkitpy', label: 'Spain' },
+  { value: 'cm8966dxv000cc1xgwjupt4q', label: 'Germany' },
+  { value: 'cm896a9jv000jc1xg6ppdbo5p', label: 'Italy' },
+  { value: 'cm896dg6000pc1xgo880mmwl6', label: 'France' },
+  { value: 'cm896oead0012c1xg8fkabyn', label: 'Belgium' },
+  { value: 'cm896tgwq0019c1xg8e4lihua', label: 'Portugal' },
+  { value: 'cm896w809001dc1xgao0mpeli', label: 'Netherlands' },
   ];
 
   const leagueOptions = [
-    { value: 'Premier League', label: 'Premier League' },
-    { value: 'La Liga', label: 'La Liga' },
-    { value: 'Bundesliga', label: 'Bundesliga' },
-    { value: 'Serie A', label: 'Serie A' },
-    { value: 'Ligue 1', label: 'Ligue 1' },
+    { value: 'cm8972v0a0000c1q8tfy342s7', label: 'English Premier League' },
+  { value: 'cm8972v0b0001c1q81krqnq3y', label: 'La Liga' },
+  { value: 'cm8972v0b0002c1q8qv2yhphh', label: 'Bundesliga' },
+  { value: 'cm8972v0b0003c1q85cfy9mz1', label: 'Serie A' },
+  { value: 'cm8972v0c0004c1q8pvf8943fk', label: 'Ligue 1' },
+  { value: 'cm8972v0c0005c1q89q6raz2e', label: 'Bundesliga 2' },
+  { value: 'cm8972v0c0006c1q8ruk8wpxc', label: 'EFL Championship' },
+  { value: 'cm8972v0c0007c1q8nrdxg5s', label: 'Jupiler Pro League' },
+  { value: 'cm8972vd0008c1q8bmah9ty3', label: 'Serie B' },
+  { value: 'cm8972vd0009c1q86m5dl18xx', label: 'Liga NOS' },
+  { value: 'cm8972vd000ac1q8x6ucvuef', label: 'Eredivisie' },
   ];
 
   // Обработчики отправки форм
   const handleCountrySubmit = () => {
-    console.log({ countryName, countryCodeShort, continent });
+    CreateCountry({ countryName, countryCodeShort, continent });
     setCountryModalOpened(false);
     setCountryName('');
     setCountryCodeShort('');
@@ -111,30 +180,21 @@ export default function Page2() {
   };
 
   const handleClubSubmit = () => {
-    console.log({
+    CreateFootballClub({
       clubName,
       foundationYear,
       city,
-      clubCountry,
-      clubLeague,
+      clubCountry
     });
     setClubModalOpened(false);
     setClubName('');
     setFoundationYear('');
     setCity('');
     setClubCountry('');
-    setClubLeague('');
   };
 
   const handleMatchSubmit = () => {
-    console.log({
-      season,
-      matchDate,
-      scoreHomeAway,
-      awayClub,
-      homeClub,
-      matchLeague,
-    });
+    CreateMatch({season, matchDate, scoreHomeAway, idAwayClub:awayClub,idHomeClub:homeClub})
     setMatchModalOpened(false);
     setSeason('');
     setMatchDate('');
@@ -143,38 +203,18 @@ export default function Page2() {
     setHomeClub('');
     setMatchLeague('');
   };
+  const handleCreateLeague = () => {
+    CreateLeague([{leagueName,leagueLevel,countryid}])
+    setMatchLeague('');
+    setleagueLevel('');
+    setCountryName('');
+  }
 
   return (
     <div className="pt-5 pl-4 pb-6">
       <h1 className="text-2xl font-bold mb-4 ml-5">Редактирование базы данных</h1>
       <div className="flex flex-wrap space-y-4">
-        <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
-          <div className="flex justify-between items-center">
-            <h1 className="text-lg font-semibold">Редактировать игроков</h1>
-            <IconPlayFootball />
-          </div>
-          <div className="flex flex-col mt-4">
-            <Button
-              className="w-full"
-              variant="filled"
-              color="#181363"
-              radius="xl"
-              leftSection={<IconPlus />}
-              onClick={() => setPlayerModalOpened(true)}
-            >
-              Добавить игрока
-            </Button>
-            <Button
-              className="w-full mt-3"
-              variant="filled"
-              color="#7C7C80"
-              radius="xl"
-              leftSection={<IconTrash />}
-            >
-              Удалить игрока
-            </Button>
-          </div>
-        </div>
+        
 
         <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
           <div className="flex justify-between items-center">
@@ -192,43 +232,7 @@ export default function Page2() {
             >
               Добавить страну
             </Button>
-            <Button
-              className="w-full mt-3"
-              variant="filled"
-              color="#7C7C80"
-              radius="xl"
-              leftSection={<IconTrash />}
-            >
-              Удалить страну
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-white shadow-md p-4 rounded-lg w-1/3">
-          <div className="flex justify-between items-center">
-            <h1 className="text-lg font-semibold">Редактировать лиги</h1>
-            <IconShieldCog />
-          </div>
-          <div className="flex flex-col mt-4">
-            <Button
-              className="w-full"
-              variant="filled"
-              color="#181363"
-              radius="xl"
-              leftSection={<IconPlus />}
-              onClick={() => setLeagueModalOpened(true)}
-            >
-              Добавить лигу
-            </Button>
-            <Button
-              className="w-full mt-3"
-              variant="filled"
-              color="#7C7C80"
-              radius="xl"
-              leftSection={<IconTrash />}
-            >
-              Удалить лигу
-            </Button>
+            
           </div>
         </div>
 
@@ -249,15 +253,7 @@ export default function Page2() {
             >
               Добавить команду
             </Button>
-            <Button
-              className="w-full mt-3"
-              variant="filled"
-              color="#7C7C80"
-              radius="xl"
-              leftSection={<IconTrash />}
-            >
-              Удалить команду
-            </Button>
+           
           </div>
         </div>
 
@@ -277,15 +273,7 @@ export default function Page2() {
             >
               Добавить матч
             </Button>
-            <Button
-              className="w-full mt-3"
-              variant="filled"
-              color="#7C7C80"
-              radius="xl"
-              leftSection={<IconTrash />}
-            >
-              Удалить матч
-            </Button>
+            
           </div>
         </div>
         <div className='w-1/3'>
@@ -300,19 +288,26 @@ export default function Page2() {
         title="Добавить лигу"
         centered
       >
-        <TextInput label="Название лиги" placeholder="Введите название лиги" />
+        <TextInput label="Название лиги" placeholder="Введите название лиги" required/>
         <Select
           label="Уровень лиги"
           placeholder="Выберите уровень лиги"
           data={[
-            { value: 'first', label: 'Первая лига' },
-            { value: 'second', label: 'Вторая лига' },
+            { value: '1', label: 'First league' },
+            { value: '2', label: 'Second league' },
+            { value: '3', label: 'Third league' },
+            { value: '4', label: 'Fourth league' },
+            { value: '5', label: 'Fivth league' },
+            { value: '6', label: 'Sixth league' },
           ]}
+          value=''
+          required
         />
         <Select
           label="Страна"
           placeholder="Выберите страну"
           data={countryOptions}
+          required
         />
         <div className="flex justify-end mt-4">
           <Button variant="default" onClick={() => setLeagueModalOpened(false)}>
@@ -387,7 +382,7 @@ export default function Page2() {
           />
           <TextInput
             label="Дата рождения"
-            placeholder="Введите дату рождения (YYYY-MM-DD)"
+            placeholder="Введите год рождения (YYYY)"
             value={playerBirthdayDate}
             onChange={(event) => setPlayerBirthdayDate(event.target.value)}
             required
@@ -443,14 +438,9 @@ export default function Page2() {
             data={countryOptions}
             value={clubCountry}
             onChange={setClubCountry}
+            required
           />
-          <Select
-            label="Лига"
-            placeholder="Выберите лигу"
-            data={leagueOptions}
-            value={clubLeague}
-            onChange={setClubLeague}
-          />
+          
           <div className="flex justify-end space-x-2">
             <Button variant="default" onClick={() => setClubModalOpened(false)}>
               Отмена
@@ -502,14 +492,6 @@ export default function Page2() {
             data={clubOptions}
             value={awayClub}
             onChange={setAwayClub}
-            required
-          />
-          <Select
-            label="Лига"
-            placeholder="Выберите лигу"
-            data={leagueOptions}
-            value={matchLeague}
-            onChange={setMatchLeague}
             required
           />
           <div className="flex justify-end space-x-2">
