@@ -204,7 +204,7 @@ export default function Page2() {
     setMatchLeague('');
   };
   const handleCreateLeague = () => {
-    CreateLeague([{leagueName,leagueLevel,countryid}])
+  
     setMatchLeague('');
     setleagueLevel('');
     setCountryName('');
