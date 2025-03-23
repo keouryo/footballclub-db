@@ -13,6 +13,7 @@ type Country = {
 type League = {
   id: string;
   leagueName: string;
+  countryid: string;
 };
 
 type City = string;
@@ -28,10 +29,11 @@ type Club = {
 
 export default function ClubSearchPage() {
   const [search, setSearch] = useState('');
-  const [country, setCountry] = useState('');
-  const [league, setLeague] = useState('');
-  const [city, setCity] = useState('');
-  const [year, setYear] = useState('');
+  const [country, setCountry] = useState<string | null>(null);
+  const [league, setLeague] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [year, setYear] = useState<string | null>(null);
+  
   const [page, setPage] = useState(1);
 
   const [filters, setFilters] = useState({
@@ -52,6 +54,8 @@ export default function ClubSearchPage() {
   const [cities, setCities] = useState<City[]>([]);
   const [years, setYears] = useState<string[]>([]);
 
+
+  
   // =============================
   // Загрузка справочников стран и лиг (начальный список)
   useEffect(() => {
@@ -146,48 +150,109 @@ export default function ClubSearchPage() {
       setLoading(false);
     }
   };
-
+  const clearFilters = () => {
+    // Сбрасываем состояния инпутов и select
+    setSearch('');
+    setCountry(null);
+    setLeague(null);
+    setCity(null);
+    setYear(null);
+  
+    const updatedFilters = {
+      search: '',
+      countryid: '',
+      leagueid: '',
+      city: '',
+      foundationYear: '',
+      page: 1,
+    };
+    
+    console.log(updatedFilters)
+  
+    setFilters(updatedFilters);
+    setPage(1); // сброс страницы на первую
+  
+    // Гарантированно после всех сбросов обновляем список клубов
+    updateFiltersAndClubs(updatedFilters);
+  };
+  
   // =============================
   // Хендлеры изменения фильтров
   const handleLeagueChange = (val: string | null) => {
-    const newLeague = val || '';
-    setLeague(newLeague);
-
-    const updatedFilters = {
-      ...filters,
-      leagueid: newLeague,
-      countryid: '',
-      city: '',
-      foundationYear: '',
-      page: 1,
-    };
-
-    setCountry('');
-    setCity('');
-    setYear('');
-
-    setFilters(updatedFilters);
-    updateFiltersAndClubs(updatedFilters);
+    const newLeagueId = val || '';
+    setLeague(newLeagueId);
+  
+    if (newLeagueId) {
+      const selectedLeague = leagues.find((l) => l.id === newLeagueId);
+      const leagueCountryId = selectedLeague?.countryid || '';
+  
+      setCountry(leagueCountryId);
+  
+      const updatedFilters = {
+        ...filters,
+        leagueid: newLeagueId,
+        countryid: leagueCountryId, // страна автоматически
+        city: '',
+        foundationYear: '',
+        page: 1,
+      };
+  
+      setCity('');
+      setYear('');
+  
+      setFilters(updatedFilters);
+      updateFiltersAndClubs(updatedFilters);
+    } else {
+      // Если убрали лигу — вернуть все страны
+      setCountry('');
+      const updatedFilters = {
+        ...filters,
+        leagueid: '',
+        countryid: '',
+        city: '',
+        foundationYear: '',
+        page: 1,
+      };
+      setCity('');
+      setYear('');
+  
+      setFilters(updatedFilters);
+      updateFiltersAndClubs(updatedFilters);
+    }
   };
-
+  
   const handleCountryChange = (val: string | null) => {
-    const newCountry = val || '';
-    setCountry(newCountry);
-
+    const newCountryId = val || '';
+    setCountry(newCountryId);
+  
+    // Если выбрана страна, сбрасываем лигу (пользователь должен выбрать новую из доступных)
+    setLeague(null);
+  
+    // Фильтруем лиги по выбранной стране
+    let filteredLeagues = leagues;
+    if (newCountryId) {
+      filteredLeagues = leagues.filter((league) => league.countryid === newCountryId);
+    }
+  
+    // Обновляем фильтры
     const updatedFilters = {
       ...filters,
-      countryid: newCountry,
+      countryid: newCountryId,
+      leagueid: '', // сбрасываем лигу
       city: '',
       foundationYear: '',
       page: 1,
     };
-
+  
     setCity('');
     setYear('');
-
+  
     setFilters(updatedFilters);
+  
+    // Обновляем список клубов
     updateFiltersAndClubs(updatedFilters);
   };
+  
 
   const handleCityChange = (val: string | null) => {
     const newCity = val || '';
@@ -233,19 +298,54 @@ export default function ClubSearchPage() {
 
   // =============================
   // Преобразуем справочники для Select
-  const countryOptions = countries
-    .map((c) => ({
-      value: c.id,
-      label: c.countryName,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const countryOptions = (() => {
+    if (league) {
+      const selectedLeague = leagues.find((l) => l.id === league);
+      const leagueCountryId = selectedLeague?.countryid;
+      console.log(selectedLeague,leagueCountryId)
+      const country = countries.find((c) => c.id === leagueCountryId);
+  
+      if (country) {
+        return [{
+          value: country.id,
+          label: country.countryName,
+        }];
+      }
+  
+      return [];
+    }
+  
+    // Если лига не выбрана — показать все страны
+    return countries
+      .map((c) => ({
+        value: c.id,
+        label: c.countryName,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  })();
+  
 
-  const leagueOptions = leagues
-    .map((l) => ({
-      value: l.id,
-      label: l.leagueName,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const leagueOptions = (() => {
+    if (country) {
+      // Если выбрана страна, фильтруем лиги по стране
+      return leagues
+        .filter((l) => l.countryid === country)
+        .map((l) => ({
+          value: l.id,
+          label: l.leagueName,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    }
+  
+    // Если страна не выбрана, показываем все лиги
+    return leagues
+      .map((l) => ({
+        value: l.id,
+        label: l.leagueName,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  })();
+  
 
   const cityOptions = cities
     .map((cityName) => ({
@@ -274,61 +374,76 @@ export default function ClubSearchPage() {
 
       {/* Панель фильтров */}
       <div className="bg-white shadow-lg p-6 rounded-2xl mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск по клубам..."
-            className="flex-1 min-w-[200px]"
-            rightSection={<IconSearch className="text-gray-400" />}
-            size="md"
-          />
+  <div className="flex flex-col md:flex-row gap-4">
+    <Input
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Поиск по клубам..."
+      className="flex-1 min-w-[200px]"
+      rightSection={<IconSearch className="text-gray-400" />}
+      size="md"
+    />
 
-          <Select
-            placeholder="Выбрать лигу"
-            value={league}
-            onChange={handleLeagueChange}
-            onDropdownOpen={fetchLeagues}
-            data={leagueOptions}
-            className="flex-1 min-w-[200px]"
-            size="md"
-            clearable
-          />
+    <Select
+      placeholder="Выбрать лигу"
+      value={league}
+      onChange={handleLeagueChange}
+      onDropdownOpen={fetchLeagues}
+      data={leagueOptions}
+      className="flex-1 min-w-[200px]"
+      size="md"
+    />
 
-          <Select
-            placeholder="Выбрать страну"
-            value={country}
-            onChange={handleCountryChange}
-            onDropdownOpen={fetchCountries}
-            data={countryOptions}
-            className="flex-1 min-w-[200px]"
-            size="md"
-            clearable
-          />
+    <Select
+      placeholder="Выбрать страну"
+      value={country}
+      onChange={handleCountryChange}
+      onDropdownOpen={fetchCountries}
+      data={countryOptions}
+      className="flex-1 min-w-[200px]"
+      size="md"
+    />
 
-          <Select
-            placeholder="Выбрать город"
-            value={city}
-            onChange={handleCityChange}
-            data={cityOptions}
-            className="flex-1 min-w-[200px]"
-            size="md"
-            clearable
-          />
+    <Select
+      placeholder="Выбрать город"
+      value={city}
+      onChange={handleCityChange}
+      data={cityOptions}
+      className="flex-1 min-w-[200px]"
+      size="md"
+    />
 
-          <Select
-            placeholder="Выбрать год основания"
-            value={year}
-            onChange={handleYearChange}
-            data={yearOptions}
-            className="flex-1 min-w-[200px]"
-            size="md"
-            clearable
-          />
-        </div>
+    <Select
+      placeholder="Выбрать год основания"
+      value={year}
+      onChange={handleYearChange}
+      data={yearOptions}
+      className="flex-1 min-w-[200px]"
+      size="md"
+    />
+  </div>
 
-        
-      </div>
+  <div className="flex flex-col md:flex-row justify-end mt-4 gap-4">
+    <Button
+      variant="filled"
+      color="blue"
+      onClick={handleSearchClick}
+      className="w-full md:w-auto"
+    >
+      Найти
+    </Button>
+
+    <Button
+      variant="outline"
+      color="red"
+      onClick={clearFilters}
+      className="w-full md:w-auto"
+    >
+      Очистить фильтры
+    </Button>
+  </div>
+</div>
+
 
       {!loading && clubs.length === 0 && !areFiltersEmpty && (
         <div className="flex justify-center mt-6 text-gray-500">
