@@ -1,231 +1,128 @@
-'use client';
-import { useState, useEffect } from 'react';
+'use client'
 import {
   Button,
-  Modal,
-  TextInput,
-  Select,
   Group,
+  Modal,
+  Select,
+  Table,
+  TextInput,
+  Title,
 } from '@mantine/core';
-import React from 'react';
 import {
-  IconFlagCog,
+  IconEdit,
   IconPlus,
   IconShirtSport,
-  IconTrash,
   IconSoccerField,
+  IconTrash,
 } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-interface ClubType {
-  id: string;
-  clubName: string;
-  city: string;
-  country?: {
-    countryName: string;
-  };
-}
 interface Country {
   id: string;
   countryName: string;
+  countryCodeShort:string;
+  continent:string
 }
 
 interface League {
   id: string;
   leagueName: string;
+  leagueLevel: string;
 }
 
-
-type Match = {
+interface FootballClub {
   id: string;
-  homeClub: {
-    id: string;
-    clubName: string;
-  };
-  awayClub: {
-    id: string;
-    clubName: string;
-  };
-  matchDate: string;
-  scoreHomeAway: string;
-  season: string;
-};
+  clubName: string;
+  city: string;
+  country: Country; // если у тебя вложенный объект
+  league: League;
+  foundationYear: string;
+}
 
-const CreateMatch = async ({
-  season,
-  matchDate,
-  scoreHomeAway,
-  idAwayClub,
-  idHomeClub,
-}: {
+interface Match {
+  id: string;
   season: string;
   matchDate: string;
+  homeClub: FootballClub;
+  awayClub: FootballClub;
   scoreHomeAway: string;
-  idAwayClub?: string;
-  idHomeClub?: string;
-}) => {
-  const data = await axios.post('api/matches', {
-    season,
-    matchDate,
-    scoreHomeAway,
-    idAwayClub,
-    idHomeClub,
-  });
-  console.log(data);
-};
+  league: League;
+}
 
-const CreateCountry = async ({
-  countryName,
-  countryCodeShort,
-  continent,
-}: {
-  countryName: string;
-  countryCodeShort: string;
-  continent: string;
-}) => {
-  const data = await axios.post('api/coutries', {
-    countryName,
-    countryCodeShort,
-    continent,
-  });
-  console.log(data);
-};
+const CreateMatch = async ({season, matchDate, scoreHomeAway, idAwayClub,idHomeClub}:{season:string,matchDate:string, scoreHomeAway:string,idAwayClub?:string,idHomeClub?:string  }) => {
+  const data = await axios.post('api/matches', {season, matchDate, scoreHomeAway, idAwayClub,idHomeClub})
 
-const CreateLeague = async ({
-  leagueName,
-  leagueLevel,
-  countryid,
-}: {
-  leagueName: string;
-  leagueLevel: string;
-  countryid: string;
-}) => {
-  const data = await axios.post('api/leagues', {
-    leagueName,
-    leagueLevel,
-    countryid,
-  });
-};
+  console.log(data)
+}
+
+const CreateCountry = async ({countryName,countryCodeShort,continent}:{countryName:string, countryCodeShort:string,continent:string}) => {
+  const data = await axios.post('api/coutries', {countryName,countryCodeShort,continent})
+  console.log(data)
+}
+const CreateLeague = async ({leagueName,leagueLevel,countryid}:{leagueName:string, leagueLevel:string, countryid:string}) =>{
+  const data = await axios.post('api/leagues', {leagueName,leagueLevel,countryid})
+}
 
 export default function Page2() {
-  const [leagueModalOpened, setLeagueModalOpened] = useState(false);
-  const [countryModalOpened, setCountryModalOpened] = useState(false);
-  const [clubModalOpened, setClubModalOpened] = useState(false);
-  const [matchModalOpened, setMatchModalOpened] = useState(false);
-  const [footballClubs, setFootballClubs] = useState<ClubType[]>([]);
-  const [leagueLevel, setLeagueLevel] = useState('');
-  const [leagueName, setLeagueName] = useState('');
-  const [countryName, setCountryName] = useState('');
-  const [countryCodeShort, setCountryCodeShort] = useState('');
-  const [continent, setContinent] = useState('');
-  const [clubName, setClubName] = useState('');
-  const [foundationYear, setFoundationYear] = useState('');
-  const [city, setCity] = useState('');
-  const [clubCountry, setClubCountry] = useState('');
-  const [clubLeague, setClubLeague] = useState('');
+  const [clubs, setClubs] = useState([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+const [leagues, setLeagues] = useState<League[]>([]);
+const [footballClubs, setFootballClubs] = useState<FootballClub[]>([]);
+const [matches, setMatches] = useState<Match[]>([]);
+  const [seasons, setSeasons] = useState([]);
   const [season, setSeason] = useState('');
   const [matchDate, setMatchDate] = useState('');
-  const [scoreHomeAway, setScoreHomeAway] = useState('');
-  const [awayClub, setAwayClub] = useState('');
   const [homeClub, setHomeClub] = useState('');
+  const [awayClub, setAwayClub] = useState('');
+  const [scoreHomeAway, setScoreHomeAway] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedLeague, setSelectedLeague] = useState(null);
+  const [clubName, setClubName] = useState('');
+  const [city, setCity] = useState('');
+  const [countryId, setCountryId] = useState<string | null>(null);
+  const [leagueId, setLeagueId] = useState<string | null>(null);
 
-  const [clubs, setClubs] = useState<ClubType[]>([]);
-// Инициализация useState с типами
-const [countries, setCountries] = useState<Country[]>([]);
-const [leagues, setLeagues] = useState<League[]>([]);
-
-  const [matches, setMatches] = useState<Match[]>([]);
   const [matchDeleteModalOpened, setMatchDeleteModalOpened] = useState(false);
-  const [clubDeleteModalOpened, setClubDeleteModalOpened] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [clubModalOpened, setClubModalOpened] = useState(false);
+  const [matchModalOpened, setMatchModalOpened] = useState(false);
+  const [clubDeleteModalOpened, setClubDeleteModalOpened] = useState(false);
 
-  const continentOptions = [
-    { value: 'Africa', label: 'Africa' },
-    { value: 'Asia', label: 'Asia' },
-    { value: 'Europe', label: 'Europe' },
-    { value: 'North America', label: 'North America' },
-    { value: 'South America', label: 'South America' },
-  ];
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const startIndex = (currentPage - 1) * pageSize;
+const endIndex = startIndex + pageSize;
+const currentMatches = matches.slice(startIndex, endIndex);
 
-  // Загрузка данных для стран, клубов и лиг из API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const countriesData = await axios.get('/api/coutries');
-        const clubsData = await axios.get('/api/clubs');
-        const leaguesData = await axios.get('/api/leagues');
-        const matchesResponse = await axios.get('api/matches');
-
-        setMatches(Array.isArray(matchesResponse.data) ? matchesResponse.data : []);
-        setCountries(countriesData.data);
-        setClubs(clubsData.data);
-        setLeagues(leaguesData.data);
-      } catch (error) {
-        console.error('Ошибка при загрузке данных:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchClubs = async () => {
-      try {
-        const res = await fetch('/api/clubs');
-        const data = await res.json();
-        if (Array.isArray(data.clubs)) {
-          setFootballClubs(data.clubs);
-        } else {
-          console.error('Ожидался массив clubs, а пришло:', data);
-        }
-      } catch (error) {
-        console.error('Ошибка при получении клубов:', error);
-      }
-    };
-    fetchClubs();
-  }, []);
-
-  const indexOfLastMatch = currentPage * pageSize;
-  const indexOfFirstMatch = indexOfLastMatch - pageSize;
-  const currentMatches = matches.slice(indexOfFirstMatch, indexOfLastMatch);
-  const totalPages = Math.ceil(matches.length / pageSize);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handleClubSubmit = async () => {
+    try {
+      await axios.post('/api/clubs', {
+        clubName,
+        city,
+        countryId,
+        leagueId,
+      });
+      fetchFootballClubs();
+      setClubModalOpened(false);
+      setClubName('');
+      setCity('');
+      setCountryId(null);
+      setLeagueId(null);
+    } catch (error) {
+      console.error('Ошибка при добавлении клуба:', error);
+    }
   };
 
-  const clubOptions =
-    matches.length > 0
-      ? [
-          { value: matches[0].homeClub.id, label: matches[0].homeClub.clubName },
-          { value: matches[0].awayClub.id, label: matches[0].awayClub.clubName },
-        ]
-      : [];
-
-  const handleCountrySubmit = () => {
-    CreateCountry({ countryName, countryCodeShort, continent });
-    setCountryModalOpened(false);
-    setCountryName('');
-    setCountryCodeShort('');
-    setContinent('');
+  const handleDeleteClub = async (clubId: string) => {
+    try {
+      await axios.delete(`/api/clubs/${clubId}`);
+      fetchFootballClubs();
+    } catch (error) {
+      console.error('Ошибка при удалении клуба:', error);
+    }
   };
-
-  const handleClubSubmit = () => {
-    console.log({
-      clubName,
-      foundationYear,
-      city,
-      clubCountry,
-      clubLeague,
-    });
-    setClubModalOpened(false);
-    setClubName('');
-    setFoundationYear('');
-    setCity('');
-    setClubCountry('');
-    setClubLeague('');
-  };
-
   const handleMatchSubmit = () => {
     CreateMatch({
       season,
@@ -244,7 +141,7 @@ const [leagues, setLeagues] = useState<League[]>([]);
 
   const handleDeleteMatch = async (matchId: string) => {
     try {
-      await axios.delete(`/api/matches/${matchId}`);
+      await axios.delete('/api/matches/${matchId}');
       const updatedMatches = matches.filter((match) => match.id !== matchId);
       setMatches(updatedMatches);
     } catch (error) {
@@ -252,28 +149,70 @@ const [leagues, setLeagues] = useState<League[]>([]);
     }
   };
 
-  const handleDeleteClub = async (clubId: string) => {
+  const fetchFootballClubs = async () => {
     try {
-      await axios.delete(`/api/clubs/${clubId}`);
-      const updatedClubs = footballClubs.filter((club) => club.id !== clubId);
-      setFootballClubs(updatedClubs);
+      const response = await axios.get('/api/clubs');
+      setFootballClubs(response.data.clubs);
     } catch (error) {
-      console.error('Ошибка при удалении клуба:', error);
+      console.error('Ошибка при получении списка клубов:', error);
     }
   };
 
-  const handleCreateLeague = () => {
-    CreateLeague({ leagueName, leagueLevel, countryid: clubCountry });
-    setLeagueName('');
-    setLeagueLevel('');
-    setCountryName('');
+  const fetchCountries = async () => {
+    try {
+      const response = await axios.get('/api/coutries');
+      setCountries(response.data);
+    } catch (error) {
+      console.error('Ошибка при получении списка стран:', error);
+    }
   };
+
+  const fetchLeagues = async () => {
+    try {
+      const response = await axios.get('/api/leagues');
+      setLeagues(response.data);
+    } catch (error) {
+      console.error('Ошибка при получении списка лиг:', error);
+    }
+  };
+
+  const fetchMatches = async (page = 1) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/matches`);
+      const data = await res.json();
+
+      setMatches(data.matches);
+      setTotalPages(data.totalPages); // получаем totalPages из API ответа
+      setCurrentPage(data.page);
+    } catch (error) {
+      console.error('Ошибка при загрузке матчей:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return; // защита от выхода за пределы страниц
+    fetchMatches(page);
+  };
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+
+  useEffect(() => {
+    fetchCountries();
+    fetchLeagues();
+    fetchFootballClubs();
+    fetchMatches();
+  }, []);
 
   return (
     <div className="pt-5 pl-4 pb-6">
       <h1 className="text-2xl font-bold mb-4 ml-5">Редактирование базы данных</h1>
       <div className="flex flex-wrap space-y-4">
-        {/* Редактирование футбольных команд */}
         <div className="bg-white shadow-md p-4 rounded-lg w-1/2">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать футбольные команды</h1>
@@ -296,21 +235,17 @@ const [leagues, setLeagues] = useState<League[]>([]);
               color="#7C7C80"
               radius="xl"
               leftSection={<IconTrash />}
-              onClick={() => {
-                console.log('Открываем модальное окно для удаления команды');
-                setClubDeleteModalOpened(true);
-              }}
+              onClick={() => setClubDeleteModalOpened(true)}
             >
               Удалить команду
             </Button>
           </div>
         </div>
 
-        {/* Редактирование футбольных матчей */}
-        <div className="bg-white shadow-md p-4 rounded-lg w-1/2">
+        <div className="bg-white shadow-md p-4 rounded-lg w-1/2 ">
           <div className="flex justify-between items-center">
             <h1 className="text-lg font-semibold">Редактировать футбольные матчи</h1>
-            <IconSoccerField />
+            <IconSoccerField/>
           </div>
           <div className="flex flex-col mt-4">
             <Button
@@ -329,110 +264,238 @@ const [leagues, setLeagues] = useState<League[]>([]);
               color="#7C7C80"
               radius="xl"
               leftSection={<IconTrash />}
-              onClick={() => setMatchDeleteModalOpened(true)}
+              onClick={() => setMatchDeleteModalOpened(true)} 
             >
               Удалить матч
             </Button>
           </div>
         </div>
+        <div className='w-1/3'>
+
+        </div>
       </div>
-      {/* Модальные окна */}
-      {/* Окно добавления команды */}
+
+
+      {/* Модалка добавления клуба */}
       <Modal
         opened={clubModalOpened}
         onClose={() => setClubModalOpened(false)}
-        title="Добавить футбольную команду"
+        title="Добавить футбольный клуб"
         centered
+      >
+        <TextInput
+          label="Название клуба"
+          placeholder="Введите название клуба"
+          value={clubName}
+          onChange={(event) => setClubName(event.target.value)}
+        />
+        <TextInput
+          label="Город"
+          placeholder="Введите город"
+          value={city}
+          onChange={(event) => setCity(event.target.value)}
+        />
+        <Select
+          label="Страна"
+          placeholder="Выберите страну"
+          data={countries.map((country) => ({
+            value: country.id,
+            label: country.countryName,
+          }))}
+          value={countryId}
+          onChange={(value) => setCountryId(value)}
+        />
+        <Select
+          label="Лига"
+          placeholder="Выберите лигу"
+          data={leagues.map((league) => ({
+            value: league.id,
+            label: league.leagueName,
+          }))}
+          value={leagueId}
+          onChange={(value) => setLeagueId(value)}
+        />
+        <Button className="mt-4 w-full" onClick={handleClubSubmit}>
+          Добавить клуб
+        </Button>
+      </Modal>
+
+      {/* Модалка удаления клуба */}
+      <Modal
+        opened={clubDeleteModalOpened}
+        onClose={() => setClubDeleteModalOpened(false)}
+        title={
+          <div className="flex text-center items-center text-lg font-bold">
+            Удалить футбольный клуб
+          </div>
+        }
+        centered
+        size="auto"
+      >
+        <div className="overflow-x-auto">
+          <Table striped highlightOnHover withTableBorder withColumnBorders className="min-w-full divide-y divide-gray-200 border">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Название клуба
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Год создания
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Название лиги
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Город
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Страна
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Действия
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {footballClubs.map((club) => (
+                <tr key={club.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {club.clubName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {club.foundationYear}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {club.league?.leagueName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {club.city}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {club.country?.countryName || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <Button
+                      variant="light"
+                      color="red"
+                      radius="xl"
+                      onClick={() => handleDeleteClub(club.id)}
+                      leftSection={<IconTrash size={16} />}
+                    >
+                      Удалить
+                    </Button>
+                    
+                  </td>
+                </tr>
+              ))}
+              
+            </tbody>
+          </Table>
+        </div>
+         {/* Нижняя панель с пагинацией */}
+  <div className="flex justify-between items-center mt-4">
+    <p className="text-sm text-gray-500">
+      Страница {currentPage} из {totalPages}
+    </p>
+    <div>
+      <Button
+        variant="default"
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
+      >
+        Предыдущая
+      </Button>
+      <Button
+        variant="default"
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
+      >
+        Следующая
+      </Button>
+      </div>
+      </div>
+      </Modal>
+
+      {/* Модалка добавления матча */}
+      <Modal
+        opened={matchModalOpened}
+        onClose={() => setMatchModalOpened(false)}
+        title="Добавить футбольный матч"
+        centered
+        size="md"
       >
         <div className="space-y-4">
           <TextInput
-            label="Название команды"
-            placeholder="Введите название команды"
-            value={clubName}
-            onChange={(event) => setClubName(event.target.value)}
+            label="Сезон"
+            placeholder="Введите сезон (например, 2024/2025)"
+            value={season}
+            onChange={(event) => setSeason(event.target.value)}
             required
           />
-          <TextInput
-            label="Год основания"
-            placeholder="Введите год основания (YYYY)"
-            value={foundationYear}
-            onChange={(event) => setFoundationYear(event.target.value)}
-            required
-          />
-          <TextInput
-            label="Город"
-            placeholder="Введите город"
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
-            required
-          />
-          <div className="flex items-center space-x-2">
-            <Select
-              label="Страна"
-              placeholder="Выберите страну"
-              data={
-                countries && countries.length > 0
-                  ? countries.map((country) => ({
-                      value: country.id,
-                      label: country.countryName,
-                    }))
-                  : []
-              }
-              value={clubCountry}
-              onChange={(value: string | null) => setClubCountry(value || '')}
 
-              required
-            />
-            <Button
-              variant="outline"
-              color="gray"
-              radius="xl"
-              leftSection={<IconPlus />}
-              onClick={() => setCountryModalOpened(true)}
-            >
-              Добавить страну
-            </Button>
-          </div>
-          <div className="flex items-center space-x-2">
+          <TextInput
+            label="Дата матча"
+            placeholder="Введите дату матча (например, 2025-04-15)"
+            value={matchDate}
+            onChange={(event) => setMatchDate(event.target.value)}
+            required
+          />
+
           <Select
-  label="Выбери лигу"
-  data={leagues.map(league => ({
-    value: league.id,
-    label: league.leagueName
-  }))}
-  onChange={(value) => {
-    if (value) setClubLeague(value);
-  }}
-/>
+            label="Домашняя команда"
+            placeholder="Выберите домашнюю команду"
+            data={footballClubs.map((club) => ({
+              value: club.id,
+              label: club.clubName,
+            }))}
+            value={homeClub}
+            onChange={(value) => setHomeClub(value || '')}
+            required
+          />
 
-            <Button
-              variant="outline"
-              color="gray"
-              radius="xl"
-              leftSection={<IconPlus />}
-              onClick={() => setLeagueModalOpened(true)}
-            >
-              Добавить лигу
-            </Button>
-          </div>
-          <Button className="w-full mt-4" onClick={handleClubSubmit}>
-            Добавить команду
+          <Select
+            label="Гостевая команда"
+            placeholder="Выберите гостевую команду"
+            data={footballClubs.map((club) => ({
+              value: club.id,
+              label: club.clubName,
+            }))}
+            value={awayClub}
+            onChange={(value) => setAwayClub(value || '')}
+            required
+          />
+
+          <TextInput
+            label="Счет матча"
+            placeholder="Введите счет (например, 2-1)"
+            value={scoreHomeAway}
+            onChange={(event) => setScoreHomeAway(event.target.value)}
+            required
+          />
+
+          <Button
+            className="w-full mt-4"
+            onClick={handleMatchSubmit}
+            disabled={!homeClub || !awayClub || !season || !matchDate || !scoreHomeAway}
+          >
+            Добавить матч
           </Button>
         </div>
       </Modal>
-
-      {/* Остальные модальные окна... */}
-
-      {/* Окно удаления матча */}
-      <Modal
+       {/* Окно удаления матча */}
+       <Modal
         opened={matchDeleteModalOpened}
         onClose={() => setMatchDeleteModalOpened(false)}
-        title="Удалить матч"
+        title={
+          <div className="flex justify-center  text-lg font-bold">
+            Удалить матч
+          </div>
+        }
         centered
-        size="lg"
+        size="auto"
       >
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 border">
+        <Table striped highlightOnHover withTableBorder withColumnBorders className="min-w-full divide-y divide-gray-200 border">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -440,6 +503,9 @@ const [leagues, setLeagues] = useState<League[]>([]);
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Дата
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Лига
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Команда дома
@@ -465,6 +531,9 @@ const [leagues, setLeagues] = useState<League[]>([]);
                     {match.matchDate}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {match.league?.leagueName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {match.homeClub?.clubName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -487,31 +556,31 @@ const [leagues, setLeagues] = useState<League[]>([]);
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
 
-        {/* Пагинация */}
-        <Group className='position="apart" mt="md"'>
-          <p className="text-sm text-gray-500">
-            Страница {currentPage} из {totalPages}
-          </p>
-          <Group className='spacing="xs"' >
-            <Button
-              variant="default"
-              disabled={currentPage === 1}
-              onClick={() => handlePageChange(currentPage - 1)}
-            >
-              Предыдущая
-            </Button>
-            <Button
-              variant="default"
-              disabled={currentPage === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
-              Следующая
-            </Button>
-          </Group>
-        </Group>
+         {/* Нижняя панель с пагинацией */}
+  <div className="flex justify-between items-center mt-4">
+    <p className="text-sm text-gray-500">
+      Страница {currentPage} из {totalPages}
+    </p>
+    <div>
+      <Button
+        variant="default"
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
+      >
+        Предыдущая
+      </Button>
+      <Button
+        variant="default"
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
+      >
+        Следующая
+      </Button>
+      </div>
+      </div>
       </Modal>
     </div>
   );
