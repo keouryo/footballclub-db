@@ -1,36 +1,76 @@
 'use client'
 
-
 import React, { useEffect, useState } from 'react'
 import { Button, Pagination, Select, Input, Loader } from '@mantine/core'
 import { IconBuildingStadium, IconSearch } from '@tabler/icons-react'
 import axios from 'axios'
 
+export interface Country {
+  id: string
+  countryName: string
+  countryCodeShort: string
+  continent: string
+}
+
+export interface League {
+  id: string
+  leagueName: string
+  leagueLevel: string
+  countryid: string | null
+  country?: Country
+  clubCount?: number
+}
+
+export interface FootballClub {
+  id: string
+  clubName: string
+  foundationYear: string
+  city: string
+  countryid?: string | null
+  leagueid?: string | null
+}
+
+export interface Match {
+  id: string
+  season: string
+  matchDate: string
+  scoreHomeAway: string
+  idAwayClub?: string | null
+  idHomeClub?: string | null
+  idLeague?: string | null
+}
+
+export interface Player {
+  id: string
+  name: string
+  position: string
+  birthdayDate: string
+  clubId?: string | null
+}
+
+interface SelectOption {
+  value: string
+  label: string
+  continent?: string
+}
+
 export default function SearchByLeague() {
-  // Состояния для фильтров
   const [searchValue, setSearchValue] = useState('')
   const [selectedLeague, setSelectedLeague] = useState('')
   const [selectedLeagueLevel, setSelectedLeagueLevel] = useState('')
   const [selectedCountry, setSelectedCountry] = useState('')
   const [selectedContinent, setSelectedContinent] = useState('')
 
-  // Исходные списки
-  const [initialCountriesList, setInitialCountriesList] = useState([])
+  const [initialCountriesList, setInitialCountriesList] = useState<SelectOption[]>([])
+  const [continentsList, setContinentsList] = useState<SelectOption[]>([])
+  const [leagueLevelsList, setLeagueLevelsList] = useState<SelectOption[]>([])
+  const [leaguesList, setLeaguesList] = useState<League[]>([])
 
-  // Данные
-  const [continentsList, setContinentsList] = useState([])
-  const [leagueLevelsList, setLeagueLevelsList] = useState([])
-  const [leaguesList, setLeaguesList] = useState([])
+  const [countriesList, setCountriesList] = useState<SelectOption[]>([])
+  const [results, setResults] = useState<League[]>([])
 
-  // Фильтрованные данные
-  const [countriesList, setCountriesList] = useState([])
-
-  const [results, setResults] = useState([])
-
-  // Состояния загрузки
   const [isLoading, setIsLoading] = useState(false)
 
-  // Получаем страны и лиги при монтировании компонента
   useEffect(() => {
     fetchInitialData()
   }, [])
@@ -42,38 +82,43 @@ export default function SearchByLeague() {
         axios.get('/api/leagues'),
       ])
 
-      const countries = countriesRes.data
-      const leagues = leaguesRes.data
+      const countries: Country[] = countriesRes.data
+      const leagues: League[] = leaguesRes.data
 
-      // Уникальные континенты
-      const uniqueContinents = Array.from(
-        new Set(countries.map((country: any) => country.continent))
-      ).map((continent) => ({
-        value: continent,
-        label: continent,
-      }))
+      const uniqueContinents: SelectOption[] = Array.from(
+        new Set(countries.map((country) => country.continent))
+      )
+        .map((continent) => ({
+          value: String(continent),
+          label: String(continent),
+        }))
+        .sort((a: SelectOption, b: SelectOption) => a.label.localeCompare(b.label))
 
-      // Уникальные уровни лиг
-      const uniqueLeagueLevels = Array.from(
-        new Set(leagues.map((league: any) => league.leagueLevel))
-      ).map((level) => ({
-        value: level,
-        label: level,
-      }))
+      const uniqueLeagueLevels: SelectOption[] = Array.from(
+        new Set(leagues.map((league) => league.leagueLevel))
+      )
+        .map((level) => ({
+          value: String(level),
+          label: String(level),
+        }))
+        .sort((a: SelectOption, b: SelectOption) => a.label.localeCompare(b.label))
 
-      const mappedCountries = countries.map((country: any) => ({
-        value: String(country.id),
-        label: country.countryName,
-        continent: country.continent,
-      }))
+      const mappedCountries: SelectOption[] = countries
+        .map((country) => ({
+          value: String(country.id),
+          label: country.countryName,
+          continent: country.continent,
+        }))
+        .sort((a: SelectOption, b: SelectOption) => a.label.localeCompare(b.label))
 
-      const mappedLeagues = leagues.map((league: any) => ({
-        id: String(league.id),
-        label: league.leagueName,
-        value: String(league.id),
-        leagueLevel: league.leagueLevel,
-        countryId: String(league.countryid), // Используем countryid
-      }))
+      const mappedLeagues: League[] = leagues
+        .map((league) => ({
+          ...league,
+          id: String(league.id),
+          leagueLevel: league.leagueLevel,
+          countryid: league.countryid,
+        }))
+        .sort((a: League, b: League) => a.leagueName.localeCompare(b.leagueName))
 
       setInitialCountriesList(mappedCountries)
       setCountriesList(mappedCountries)
@@ -94,43 +139,36 @@ export default function SearchByLeague() {
       return
     }
 
-    // Логируем исходные данные
     console.log('Исходные лиги:', leaguesList)
     console.log('Исходные страны:', initialCountriesList)
 
-    // Фильтруем лиги по уровню
     const filteredLeagues = leaguesList.filter(
       (league) => league.leagueLevel === leagueLevel
     )
 
     console.log('Отфильтрованные лиги:', filteredLeagues)
 
-    // Проверка, что каждая лига содержит countryid
     const countryIds = Array.from(
       new Set(
         filteredLeagues
           .map((league) => {
-            // Логируем каждый countryid
-            console.log('league.countryid', league.countryId)
-            return league.countryId ? String(league.countryId) : null // Проверяем наличие countryId
+            console.log('league.countryid', league.countryid)
+            return league.countryid ? String(league.countryid) : null
           })
-          .filter((id) => id !== null) // Убираем null значения
+          .filter((id) => id !== null)
       )
     )
 
     console.log('ID стран из отфильтрованных лиг:', countryIds)
 
-    // Фильтруем страны по найденным countryIds
     const filteredCountries = initialCountriesList.filter((country) =>
-      countryIds.includes(String(country.value)) // Сравниваем с полем value (id страны)
+      countryIds.includes(String(country.value))
     )
 
     console.log('Отфильтрованные страны:', filteredCountries)
 
-    // Обновляем список стран
     setCountriesList(filteredCountries)
 
-    // Если текущая выбранная страна не входит в отфильтрованный список, сбрасываем её
     if (!countryIds.includes(selectedCountry)) {
       console.log('Сброс выбранной страны:', selectedCountry)
       setSelectedCountry('')
@@ -138,7 +176,7 @@ export default function SearchByLeague() {
   }
 
   const handleSearch = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
       console.log('Search parameters:', {
@@ -147,7 +185,7 @@ export default function SearchByLeague() {
         leagueLevel: selectedLeagueLevel,
         countryId: selectedCountry,
         continent: selectedContinent,
-      });
+      })
 
       const response = await axios.get('/api/leagues', {
         params: {
@@ -157,14 +195,14 @@ export default function SearchByLeague() {
           countryId: selectedCountry,
           continent: selectedContinent,
         },
-      });
+      })
 
-      setResults(response.data);
+      setResults(response.data)
     } catch (error) {
-      console.error('Ошибка при поиске лиг', error);
-      setResults([]);
+      console.error('Ошибка при поиске лиг', error)
+      setResults([])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -173,7 +211,6 @@ export default function SearchByLeague() {
       <h1 className="text-2xl font-bold mb-4">Поиск по лигам и странам</h1>
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
-        {/* Фильтры */}
         <div className="flex flex-wrap gap-4">
           <Input
             rightSection={<IconSearch />}
@@ -208,27 +245,23 @@ export default function SearchByLeague() {
           />
         </div>
 
-        {/* Кнопка поиска на новой строке */}
         <div className="flex justify-start">
           <Button onClick={handleSearch}>Поиск</Button>
         </div>
       </div>
 
-      {/* Loader при загрузке */}
       {isLoading && (
         <div className="flex justify-center mt-6">
           <Loader />
         </div>
       )}
 
-      {/* Если нет результатов */}
       {!isLoading && results.length === 0 && (
         <div className="flex justify-center mt-6 text-gray-500">
           Ничего не найдено
         </div>
       )}
 
-      {/* Если есть результаты */}
       {!isLoading && results.length > 0 && (
         <div className="mt-6">
           <div className="bg-white rounded-lg shadow-md p-4">
@@ -240,26 +273,24 @@ export default function SearchByLeague() {
             </div>
 
             <div className="space-y-4">
-            {results.map((item: any) => (
-  <div
-    key={item.id}
-    className="p-4 bg-white shadow-md rounded-lg"
-  >
-    <div className="flex items-center">
-      <IconBuildingStadium className="size-12 opacity-50 mr-4" />
-      <p className="text-lg font-bold">{item.leagueName}</p>
-    </div>
+              {results.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-4 bg-white shadow-md rounded-lg"
+                >
+                  <div className="flex items-center">
+                    <IconBuildingStadium className="size-12 opacity-50 mr-4" />
+                    <p className="text-lg font-bold">{item.leagueName}</p>
+                    <p className="text-lg ml-2">
+                      Страна: {item.country?.countryName || 'Неизвестно'} |
+                      Уровень лиги: {item.leagueLevel} |
+                      Континент: {item.country?.continent || 'Неизвестно'} |
+                      Количество клубов: {item.clubCount || 0}
+                    </p>
+                  </div>
+                </div>
+              ))}
 
-    <div className="mt-2 text-sm text-gray-600">
-      Страна: {item.country?.countryName || 'Неизвестно'} | 
-      Уровень лиги: {item.leagueLevel} | 
-      Континент: {item.country?.continent || 'Неизвестно'} | 
-      Количество клубов: {item.clubCount || 0}
-    </div>
-  </div>
-))}
-
-              {/* Пагинация (заглушка) */}
               <div className="flex justify-center mt-4">
                 <Pagination total={1} />
               </div>

@@ -26,8 +26,6 @@ type Club = {
   league: League;
 };
 
-
-
 export default function ClubSearchPage() {
   const [search, setSearch] = useState('');
   const [country, setCountry] = useState('');
@@ -35,26 +33,6 @@ export default function ClubSearchPage() {
   const [city, setCity] = useState('');
   const [year, setYear] = useState('');
   const [page, setPage] = useState(1);
-
-  const fetchLeagues = async () => {
-    try {
-      const res = await fetch('/api/leagues');
-      const data = await res.json();
-      setLeagues(data);
-    } catch (err) {
-      console.error('Ошибка загрузки лиг:', err);
-    }
-  };
-  const fetchCountries = async () => {
-    try {
-      const res = await fetch('/api/coutries');
-      const data = await res.json();
-      setCountries(data);
-    } catch (err) {
-      console.error('Ошибка загрузки стран:', err);
-    }
-  };
-
 
   const [filters, setFilters] = useState({
     search: '',
@@ -77,12 +55,35 @@ export default function ClubSearchPage() {
   // =============================
   // Загрузка справочников стран и лиг (начальный список)
   useEffect(() => {
-  
-   
-
     fetchCountries();
     fetchLeagues();
   }, []);
+
+  const fetchCountries = async () => {
+    try {
+      const res = await fetch('/api/coutries');
+      let data = await res.json();
+
+      // Сортируем по алфавиту
+      data.sort((a: Country, b: Country) => a.countryName.localeCompare(b.countryName));
+      setCountries(data);
+    } catch (err) {
+      console.error('Ошибка загрузки стран:', err);
+    }
+  };
+
+  const fetchLeagues = async () => {
+    try {
+      const res = await fetch('/api/leagues');
+      let data = await res.json();
+
+      // Сортируем по алфавиту
+      data.sort((a: League, b: League) => a.leagueName.localeCompare(b.leagueName));
+      setLeagues(data);
+    } catch (err) {
+      console.error('Ошибка загрузки лиг:', err);
+    }
+  };
 
   // =============================
   // Основная функция загрузки клубов + обновление фильтров
@@ -114,6 +115,8 @@ export default function ClubSearchPage() {
       )
         .map((id) => countries.find((c) => c.id === id))
         .filter(Boolean) as Country[];
+
+      uniqueCountries.sort((a, b) => a.countryName.localeCompare(b.countryName));
       setCountries(uniqueCountries);
 
       // Уникальные лиги из результата клубов
@@ -122,18 +125,20 @@ export default function ClubSearchPage() {
       )
         .map((id) => leagues.find((l) => l.id === id))
         .filter(Boolean) as League[];
+
+      uniqueLeagues.sort((a, b) => a.leagueName.localeCompare(b.leagueName));
       setLeagues(uniqueLeagues);
 
-      // Уникальные города
+      // Уникальные города (алфавит)
       const uniqueCities = Array.from(
         new Set(clubsData.map((club) => club.city).filter(Boolean))
-      ).sort();
+      ).sort((a, b) => a.localeCompare(b));
       setCities(uniqueCities);
 
-      // Уникальные года основания
+      // Уникальные года основания (по возрастанию чисел)
       const uniqueYears = Array.from(
         new Set(clubsData.map((club) => club.foundationYear).filter(Boolean))
-      ).sort();
+      ).sort((a, b) => Number(a) - Number(b));
       setYears(uniqueYears);
     } catch (err) {
       console.error('Ошибка обновления фильтров и клубов:', err);
@@ -163,8 +168,6 @@ export default function ClubSearchPage() {
 
     setFilters(updatedFilters);
     updateFiltersAndClubs(updatedFilters);
-
-
   };
 
   const handleCountryChange = (val: string | null) => {
@@ -230,29 +233,40 @@ export default function ClubSearchPage() {
 
   // =============================
   // Преобразуем справочники для Select
-  const countryOptions = countries.map((c) => ({
-    value: c.id,
-    label: c.countryName,
-  }));
+  const countryOptions = countries
+    .map((c) => ({
+      value: c.id,
+      label: c.countryName,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
-  const leagueOptions = leagues.map((l) => ({
-    value: l.id,
-    label: l.leagueName,
-  }));
+  const leagueOptions = leagues
+    .map((l) => ({
+      value: l.id,
+      label: l.leagueName,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
-  const cityOptions = cities.map((cityName) => ({
-    value: cityName,
-    label: cityName,
-  }));
+  const cityOptions = cities
+    .map((cityName) => ({
+      value: cityName,
+      label: cityName,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
-  const yearOptions = years.map((year) => ({
-    value: year,
-    label: year,
-  }));
+  const yearOptions = years
+    .map((year) => ({
+      value: year,
+      label: year,
+    }))
+    .sort((a, b) => Number(a.value) - Number(b.value));
 
-  // =============================
-  // Проверка на пустые фильтры
-  const areFiltersEmpty = !filters.search && !filters.countryid && !filters.leagueid && !filters.city && !filters.foundationYear;
+  const areFiltersEmpty =
+    !filters.search &&
+    !filters.countryid &&
+    !filters.leagueid &&
+    !filters.city &&
+    !filters.foundationYear;
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -285,8 +299,8 @@ export default function ClubSearchPage() {
             placeholder="Выбрать страну"
             value={country}
             onChange={handleCountryChange}
-            data={countryOptions}
             onDropdownOpen={fetchCountries}
+            data={countryOptions}
             className="flex-1 min-w-[200px]"
             size="md"
             clearable
@@ -300,7 +314,6 @@ export default function ClubSearchPage() {
             className="flex-1 min-w-[200px]"
             size="md"
             clearable
-            searchable={false}
           />
 
           <Select
@@ -311,23 +324,18 @@ export default function ClubSearchPage() {
             className="flex-1 min-w-[200px]"
             size="md"
             clearable
-            searchable={false}
           />
         </div>
 
-        <div className="flex justify-start mt-6">
-
-        </div>
+        
       </div>
 
-      {/* Если фильтры пустые и нет результатов */}
       {!loading && clubs.length === 0 && !areFiltersEmpty && (
         <div className="flex justify-center mt-6 text-gray-500">
           Ничего не найдено
         </div>
       )}
 
-      {/* Результаты поиска */}
       <div className="bg-white shadow-lg p-6 rounded-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Результаты поиска</h2>
