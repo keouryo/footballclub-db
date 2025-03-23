@@ -65,14 +65,15 @@ export async function GET(req: Request) {
 
 
 export const POST = async(request: NextRequest)=> {
-    const {leagueName,leagueLevel,countryName} = await request.json()
+    const { leagueName, leagueLevel, countryid } = await request.json();
 
-    const data = await prisma.league.create({data:{
-      leagueName:countryName,
-      leagueLevel:leagueLevel,
-      countryid:countryName,
-    }})
-
+const data = await prisma.league.create({
+  data: {
+    leagueName: leagueName, // Правильно
+    leagueLevel: leagueLevel,
+    countryid: countryid,   // Правильно
+  },
+});
     return NextResponse.json({data},{status: 200})
     
 }

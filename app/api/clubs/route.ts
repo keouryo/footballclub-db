@@ -11,9 +11,9 @@ export async function GET(req: Request) {
   const city = searchParams.get('city') || undefined;
   const foundationYear = searchParams.get('foundationYear') || undefined; // Строка, как в модели!
 
-  // Пагинация
+  const all = searchParams.get('all') === 'true'; // Проверяем флаг "все данные"
   const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '10');
+  const limit = all ? 1000 : parseInt(searchParams.get('limit') || '10'); // Устанавливаем большой лимит, если all=true
   const offset = (page - 1) * limit;
 
   const filters: any = {};
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
           country: true,  // country — имя связи
           league: true,   // league — имя связи
         },
-        skip: offset,
+        skip: all ? undefined : offset,
         take: limit,
         orderBy: {
           clubName: 'asc',
@@ -76,13 +76,14 @@ export async function GET(req: Request) {
 }
 
 export const POST = async(request: NextRequest)=> {
-    const {clubName,foundationYear,city,country} = await request.json()
+    const {clubName,foundationYear,city,country,league} = await request.json()
 
     const data = await prisma.footballClub.create({data:{
       clubName:clubName,
       foundationYear:foundationYear,
       city:city,
       country:country,
+      league:league,
     }})
 
     return NextResponse.json({data},{status: 200})
