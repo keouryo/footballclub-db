@@ -370,7 +370,7 @@ export default function ClubSearchPage() {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Поиск клубов по атрибутам</h1>
+      <h1 className="text-3xl font-bold mb-6" >Поиск клубов по атрибутам</h1>
 
       {/* Панель фильтров */}
       <div className="bg-white shadow-lg p-6 rounded-2xl mb-8">

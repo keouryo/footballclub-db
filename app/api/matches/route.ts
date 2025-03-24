@@ -86,7 +86,7 @@ export async function GET(req: Request) {
 
 export const POST = async(request: NextRequest)=> {
     const {idLeague,season,idHomeClub,idAwayClub,matchDate,scoreHomeAway} = await request.json()
-
+ 
     const data = await prisma.match.create({data:{
     season: season,
     matchDate: matchDate,

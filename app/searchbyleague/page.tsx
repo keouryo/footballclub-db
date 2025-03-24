@@ -187,7 +187,7 @@ export default function SearchByLeague() {
 
   return (
     <div className="pt-5 pl-4 pb-6 pr-4">
-      <h1 className="text-2xl font-bold mb-4">Поиск по лигам и странам</h1>
+      <h1 className="text-2xl font-bold mb-4">Поиск по стране</h1>
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex flex-wrap gap-4">

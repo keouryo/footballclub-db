@@ -5,7 +5,6 @@ import {IconBallFootball, IconChartBarPopular, IconInputSearch, IconTablePlus} f
 import Link from "next/link"
 import React from "react"
 
-
 export default function Header(){
     return(
     <header className="text-2xl pt-4 pl-5 pr-5 pb-4">
