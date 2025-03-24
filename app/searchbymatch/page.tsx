@@ -136,13 +136,7 @@ export default function SearchByMatch() {
       {/* Панель фильтров */}
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex justify-between items-center gap-4 flex-wrap">
-          <Input
-            leftSection={<IconSearch />}
-            placeholder="Введите название матча..."
-            className="w-full md:w-1/3"
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-          />
+          
 
           <Select
             placeholder="Выбрать сезон"
