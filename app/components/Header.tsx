@@ -35,7 +35,7 @@ export default function Header(){
             <Menu.Dropdown>
                 {/* Элементы меню */}
                 <Menu.Item component={Link} href={'/page1'}>
-                Поиск клуба
+                Поиск клуба по атрибутам
                 </Menu.Item>
                 <Menu.Item component={Link} href={'/searchbyleague'}>
                 Поиск по лиге
