@@ -54,11 +54,11 @@ interface SelectOption {
 }
 
 export default function SearchByLeague() {
-  const [searchValue, setSearchValue] = useState('')
-  const [selectedLeague, setSelectedLeague] = useState('')
-  const [selectedLeagueLevel, setSelectedLeagueLevel] = useState('')
-  const [selectedCountry, setSelectedCountry] = useState('')
-  const [selectedContinent, setSelectedContinent] = useState('')
+const [searchValue, setSearchValue] = useState('') // Остается строкой
+const [selectedLeague, setSelectedLeague] = useState<string | null>(null)
+const [selectedLeagueLevel, setSelectedLeagueLevel] = useState<string | null>(null)
+const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+const [selectedContinent, setSelectedContinent] = useState<string | null>(null)
 
   const [initialCountriesList, setInitialCountriesList] = useState<SelectOption[]>([])
   const [continentsList, setContinentsList] = useState<SelectOption[]>([])
@@ -129,14 +129,21 @@ export default function SearchByLeague() {
     }
   }
 
-  const handleCountryFilter = (countryId: string) => {
+  const handleCountryFilter = (countryId: string | null) => {
     setSelectedCountry(countryId)
-
+  
+    if (!countryId) {
+      // Если страна не выбрана, сбросить уровни лиг и выбранный уровень лиги
+      setLeagueLevelsList([])
+      setSelectedLeagueLevel(null)
+      return
+    }
+  
     // Фильтруем доступные лиги по выбранной стране
     const filteredLeagues = leaguesList.filter(
       (league) => league.countryid === countryId
     )
-
+  
     // Получаем уникальные уровни лиг для выбранной страны
     const uniqueLevels = Array.from(
       new Set(filteredLeagues.map((league) => league.leagueLevel))
@@ -146,14 +153,33 @@ export default function SearchByLeague() {
         label: String(level),
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-
+  
+    // Обновляем список уровней лиг
     setLeagueLevelsList(uniqueLevels)
-
-    if (!filteredLeagues.some((league) => league.leagueLevel === selectedLeagueLevel)) {
-      setSelectedLeagueLevel('')  // Сброс уровня лиги, если нет подходящих лиг
+  
+    // Сбрасываем выбранный уровень лиги, если он недоступен для выбранной страны
+    if (
+      selectedLeagueLevel &&
+      !uniqueLevels.some((level) => level.value === selectedLeagueLevel)
+    ) {
+      setSelectedLeagueLevel(null)
     }
   }
-
+  const handleResetFilters = () => {
+    setSearchValue('')
+    setSelectedLeague(null)
+    setSelectedLeagueLevel(null)
+    setSelectedCountry(null)
+    setSelectedContinent(null)
+  
+    setCountriesList(initialCountriesList)
+  
+    // Сброс уровней и континентов на начальные значения
+    fetchInitialData()
+  
+    // Очищаем результаты поиска
+    setResults([])
+  }
   const handleSearch = async () => {
     setIsLoading(true)
 
@@ -217,9 +243,13 @@ export default function SearchByLeague() {
           />
         </div>
 
-        <div className="flex justify-start">
-          <Button onClick={handleSearch}>Поиск</Button>
-        </div>
+        <div className="flex flex-col md:flex-row justify-end mt-4 gap-4">
+  <Button onClick={handleSearch}>Поиск</Button>
+  <Button variant="outline" color="red" onClick={handleResetFilters}>
+    Сбросить фильтры
+  </Button>
+</div>
+
       </div>
 
       {isLoading && (
