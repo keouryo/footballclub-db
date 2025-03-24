@@ -191,7 +191,7 @@ export default function SearchByLeague() {
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex flex-wrap gap-4">
-          =
+          
 
           <Select
             placeholder="Выбрать страну"
