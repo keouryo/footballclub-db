@@ -375,14 +375,7 @@ export default function ClubSearchPage() {
       {/* Панель фильтров */}
       <div className="bg-white shadow-lg p-6 rounded-2xl mb-8">
   <div className="flex flex-col md:flex-row gap-4">
-    <Input
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      placeholder="Поиск по клубам..."
-      className="flex-1 min-w-[200px]"
-      rightSection={<IconSearch className="text-gray-400" />}
-      size="md"
-    />
+   
 
     <Select
       placeholder="Выбрать лигу"

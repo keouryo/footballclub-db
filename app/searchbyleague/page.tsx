@@ -191,13 +191,7 @@ export default function SearchByLeague() {
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex flex-wrap gap-4">
-          <Input
-            rightSection={<IconSearch />}
-            placeholder="Поиск по названию лиги..."
-            className="flex-1 min-w-[200px]"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.currentTarget.value)}
-          />
+          =
 
           <Select
             placeholder="Выбрать страну"
