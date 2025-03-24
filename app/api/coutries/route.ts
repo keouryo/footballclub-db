@@ -11,7 +11,7 @@ export async function GET() {
   }
 }
 
-
+  
 export const POST = async(request: NextRequest)=> {
     const {countryName,countryCodeShort,continent} = await request.json()
 

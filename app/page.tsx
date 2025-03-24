@@ -1,5 +1,4 @@
 'use client'
-
 import { PieChart } from "@mantine/charts";
 import { Button, Table, Title } from "@mantine/core";
 import {

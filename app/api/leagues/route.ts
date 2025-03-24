@@ -62,7 +62,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Ошибка на сервере' }, { status: 500 })
   }
 }
-
+ 
 
 export const POST = async(request: NextRequest)=> {
     const { leagueName, leagueLevel, countryid } = await request.json();

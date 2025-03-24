@@ -44,16 +44,18 @@ export default function SearchByMatch() {
 
   interface Filters {
     search: string;
-    leagueid: string;
-    season: string;
-    homeClubId: string;
+    leagueid: string | null;
+    season: string | null;
+    homeClubId: string | null;
     page: number;
   }
 
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [leagues, setLeagues] = useState<League[]>([]);
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [seasons, setSeasons] = useState<string[]>([]);
+  
+  const [seasons, setSeasons] = useState<string[]>([]); // вместо null
+const [leagues, setLeagues] = useState<League[]>([]);
+const [clubs, setClubs] = useState<Club[]>([]);
+const [matches, setMatches] = useState<Match[]>([]);
+
   const [filters, setFilters] = useState<Filters>({
     search: '',
     leagueid: '',
@@ -114,6 +116,23 @@ export default function SearchByMatch() {
     }
   }, [filters]);
 
+// Начальное значение фильтров (для удобства переиспользования)
+const initialFilters: Filters = {
+  search: '',
+  leagueid: null,
+  season: null,
+  homeClubId: null,
+  page: 1,
+};
+
+
+
+// Функция очистки фильтров
+const handleClearFilters = () => {
+  setFilters(initialFilters);
+};
+
+
   useEffect(() => {
     fetchMatches();
   }, [fetchMatches]);
@@ -136,42 +155,51 @@ export default function SearchByMatch() {
       {/* Панель фильтров */}
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex justify-between items-center gap-4 flex-wrap">
-          
+  <Select
+    placeholder="Выбрать сезон"
+    className="flex-1 min-w-[200px]"
+    value={filters.season}
+    onChange={(val) => handleFilterChange('season', val || '')}
+    data={seasons.map((s) => ({ value: s, label: s }))}
+    clearable
+  />
 
-          <Select
-            placeholder="Выбрать сезон"
-            className="flex-1 min-w-[200px]"
-            value={filters.season}
-            onChange={(val) => handleFilterChange('season', val || '')}
-            data={seasons.map((s) => ({ value: s, label: s }))}
-            clearable
-          />
+  <Select
+    placeholder="Выбрать лигу"
+    className="flex-1 min-w-[200px]"
+    value={filters.leagueid}
+    onChange={(val) => handleFilterChange('leagueid', val || '')}
+    data={leagues.map((l) => ({
+      value: l.id,
+      label: l.leagueName,
+    }))}
+    clearable
+  />
 
-          <Select
-            placeholder="Выбрать лигу"
-            className="flex-1 min-w-[200px]"
-            value={filters.leagueid}
-            onChange={(val) => handleFilterChange('leagueid', val || '')}
-            data={leagues.map((l) => ({
-              value: l.id,
-              label: l.leagueName,
-            }))}
-            clearable
-          />
+  <Select
+    placeholder="Выбрать домашнюю команду"
+    className="flex-1 min-w-[200px]"
+    value={filters.homeClubId}
+    onChange={(val) => handleFilterChange('homeClubId', val || '')}
+    data={clubs.map((c) => ({
+      value: c.id,
+      label: c.clubName,
+    }))}
+    clearable
+  />
 
-          <Select
-            placeholder="Выбрать домашнюю команду"
-            className="flex-1 min-w-[200px]"
-            value={filters.homeClubId}
-            onChange={(val) => handleFilterChange('homeClubId', val || '')}
-            data={clubs.map((c) => ({
-              value: c.id,
-              label: c.clubName,
-            }))}
-            clearable
-          />
-        </div>
-      </div>
+  {/* Кнопка Очистить фильтры */}
+  <Button
+    variant="outline"
+    color="red"
+    onClick={handleClearFilters}
+    className="min-w-[200px]"
+  >
+    Очистить фильтры
+  </Button>
+</div>
+</div>
+
 
       {/* Блок результатов */}
       <div className="mt-6">

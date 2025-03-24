@@ -5,7 +5,6 @@ import {IconBallFootball, IconChartBarPopular, IconInputSearch, IconTablePlus} f
 import Link from "next/link"
 import React from "react"
 
-
 export default function Header(){
     return(
     <header className="text-2xl pt-4 pl-5 pr-5 pb-4">
@@ -35,7 +34,7 @@ export default function Header(){
             <Menu.Dropdown>
                 {/* Элементы меню */}
                 <Menu.Item component={Link} href={'/page1'}>
-                Поиск клуба
+                Поиск клуба по атрибутам
                 </Menu.Item>
                 <Menu.Item component={Link} href={'/searchbyleague'}>
                 Поиск по лиге
