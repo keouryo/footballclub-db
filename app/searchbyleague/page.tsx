@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useEffect, useState } from 'react'
 import { Button, Pagination, Select, Input, Loader } from '@mantine/core'
 import { IconBuildingStadium, IconSearch } from '@tabler/icons-react'
@@ -130,48 +129,28 @@ export default function SearchByLeague() {
     }
   }
 
-  const handleCountryFilter = (leagueLevel: string) => {
-    setSelectedLeagueLevel(leagueLevel)
+  const handleCountryFilter = (countryId: string) => {
+    setSelectedCountry(countryId)
 
-    if (!leagueLevel) {
-      console.log('Сброс фильтра лиг. Восстановление полного списка стран.')
-      setCountriesList(initialCountriesList)
-      return
-    }
-
-    console.log('Исходные лиги:', leaguesList)
-    console.log('Исходные страны:', initialCountriesList)
-
+    // Фильтруем доступные лиги по выбранной стране
     const filteredLeagues = leaguesList.filter(
-      (league) => league.leagueLevel === leagueLevel
+      (league) => league.countryid === countryId
     )
 
-    console.log('Отфильтрованные лиги:', filteredLeagues)
-
-    const countryIds = Array.from(
-      new Set(
-        filteredLeagues
-          .map((league) => {
-            console.log('league.countryid', league.countryid)
-            return league.countryid ? String(league.countryid) : null
-          })
-          .filter((id) => id !== null)
-      )
+    // Получаем уникальные уровни лиг для выбранной страны
+    const uniqueLevels = Array.from(
+      new Set(filteredLeagues.map((league) => league.leagueLevel))
     )
+      .map((level) => ({
+        value: String(level),
+        label: String(level),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
 
-    console.log('ID стран из отфильтрованных лиг:', countryIds)
+    setLeagueLevelsList(uniqueLevels)
 
-    const filteredCountries = initialCountriesList.filter((country) =>
-      countryIds.includes(String(country.value))
-    )
-
-    console.log('Отфильтрованные страны:', filteredCountries)
-
-    setCountriesList(filteredCountries)
-
-    if (!countryIds.includes(selectedCountry)) {
-      console.log('Сброс выбранной страны:', selectedCountry)
-      setSelectedCountry('')
+    if (!filteredLeagues.some((league) => league.leagueLevel === selectedLeagueLevel)) {
+      setSelectedLeagueLevel('')  // Сброс уровня лиги, если нет подходящих лиг
     }
   }
 
@@ -221,19 +200,18 @@ export default function SearchByLeague() {
           />
 
           <Select
-            placeholder="Выбрать уровень лиги"
-            className="flex-1 min-w-[200px]"
-            data={leagueLevelsList}
-            value={selectedLeagueLevel}
-            onChange={(val) => handleCountryFilter(val || '')}
-          />
-
-          <Select
             placeholder="Выбрать страну"
             className="flex-1 min-w-[200px]"
             data={countriesList}
             value={selectedCountry}
-            onChange={(val) => setSelectedCountry(val || '')}
+            onChange={(val) => handleCountryFilter(val || '')}
+          />
+          <Select
+            placeholder="Выбрать уровень лиги"
+            className="flex-1 min-w-[200px]"
+            data={leagueLevelsList}
+            value={selectedLeagueLevel}
+            onChange={(val) => setSelectedLeagueLevel(val || '')}
           />
 
           <Select

@@ -99,3 +99,43 @@ export const POST = async(request: NextRequest)=> {
     return NextResponse.json({data},{status: 200})
     
 }
+export const DELETE = async (req: NextRequest) => {
+  try {
+    const { id } = await req.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Не передан параметр id' },
+        { status: 400 }
+      );
+    }
+
+    // Проверяем, существует ли такой клуб
+    const existingmatch = await prisma.match.findUnique({
+      where: { id },
+    });
+
+    if (!existingmatch) {
+      return NextResponse.json(
+        { error: 'Матч не найден' },
+        { status: 404 }
+      );
+    }
+
+    // Удаляем клуб
+    await prisma.match.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { message: 'Матч успешно удалён', id },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Ошибка при удалении матча:', error);
+    return NextResponse.json(
+      { error: 'Ошибка на сервере' },
+      { status: 500 }
+    );
+  }
+};

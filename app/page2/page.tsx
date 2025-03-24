@@ -63,6 +63,8 @@ const CreateMatch = async ({season, matchDate, scoreHomeAway, idAwayClub,idHomeC
   console.log(data)
 }
 
+
+
 const CreateCountry = async ({countryName,countryCodeShort,continent}:{countryName:string, countryCodeShort:string,continent:string}) => {
   const data = await axios.post('api/coutries', {countryName,countryCodeShort,continent})
   console.log(data)
@@ -75,22 +77,24 @@ const CreateClub = async ({
   clubName,
   city,
   countryId,
+  foundationYear,
   leagueId,
 }: {
   clubName: string;
   city: string;
-  countryId: string;
-  leagueId: string;
+  countryId: string; // Убедитесь, что это строка
+  foundationYear: string;
+  leagueId: string; // Убедитесь, что это строка
 }) => {
-
-    const data = await axios.post('/api/clubs', {
-      clubName,
-      city,
-      countryId,
-      leagueId,
-    });
-    console.log
-  }
+  const data = await axios.post('/api/clubs', {
+    clubName,
+    city,
+    countryId,
+    foundationYear,
+    leagueId,
+  });
+  console.log(data); // Исправлено отсутствующее закрытие скобки
+}
 export default function Page2() {
   const [allFootballClubs, setAllFootballClubs] = useState<FootballClub[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -104,11 +108,11 @@ const [matches, setMatches] = useState<Match[]>([]);
   const [scoreHomeAway, setScoreHomeAway] = useState('');
 
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
-  
+  const [foundationYear, setFoundationYear] = useState('');
   const [clubName, setClubName] = useState('');
   const [city, setCity] = useState('');
-  const [countryId, setCountryId] = useState<string | null>(null);
-  const [leagueId, setLeagueId] = useState<string | null>(null);
+  const [countryId, setCountryId] = useState('');
+  const [leagueId, setLeagueId] = useState('');
 const [filters, setFilters] = useState<Filters>({
     search: '',
     leagueid: '',
@@ -142,20 +146,21 @@ const endClubIndex = startClubIndex + pageSize;
 const handleClubSubmit = async () => {
   try {
     // Проверяем, что все обязательные поля заполнены
-    if (!clubName || !city || !countryId || !leagueId) {
+    if (!clubName || !city || !foundationYear || !countryId || !leagueId) {
       alert('Пожалуйста, заполните все поля.');
       return;
     }
 
     // Отправляем запрос на сервер
-    const response = await axios.post('/api/clubs', {
+    await CreateClub({
       clubName,
       city,
       countryId,
       leagueId,
+      foundationYear,
     });
 
-    console.log('Клуб успешно создан:', response.data);
+    console.log('Клуб успешно создан:');
 
     // Обновляем список клубов
     fetchFootballClubs();
@@ -163,8 +168,9 @@ const handleClubSubmit = async () => {
     // Очищаем форму
     setClubName('');
     setCity('');
-    setCountryId(null);
-    setLeagueId(null);
+    setFoundationYear('');
+        setCountryId('');
+    setLeagueId('');
 
     // Закрываем модальное окно
     setClubModalOpened(false);
@@ -243,15 +249,21 @@ const handleClubSubmit = async () => {
       alert('Произошла ошибка при создании страны');
     }
   };
-
   const handleDeleteClub = async (clubId: string) => {
+    const confirmDelete = window.confirm('Вы уверены, что хотите удалить этот клуб?');
+    if (!confirmDelete) return;
+  
     try {
-      await axios.delete(`/api/clubs/${clubId}`);
-      fetchFootballClubs();
+      await axios.delete('/api/clubs', {
+        data: { id: clubId }, // <== ВАЖНО! Иначе сервер не получит id
+      });
+  
+      fetchFootballClubs(); // обновляем список после удаления
     } catch (error) {
       console.error('Ошибка при удалении клуба:', error);
     }
   };
+  
   const handleMatchSubmit = async () => {
     if (!selectedLeagueId) {
       console.error('Ошибка: Лига не выбрана.');
@@ -268,6 +280,7 @@ const handleClubSubmit = async () => {
         season,
         matchDate,
         scoreHomeAway,
+        idLeague: selectedLeagueId,
         idAwayClub: awayClub,
         idHomeClub: homeClub,
       });
@@ -292,12 +305,17 @@ const handleClubSubmit = async () => {
 
 
   const handleDeleteMatch = async (matchId: string) => {
+    const confirmDelete = window.confirm('Вы уверены, что хотите удалить этот клуб?');
+    if (!confirmDelete) return;
+  
     try {
-      await axios.delete('/api/matches/${matchId}');
-      const updatedMatches = matches.filter((match) => match.id !== matchId);
-      setMatches(updatedMatches);
+      await axios.delete('/api/matches', {
+        data: { id: matchId }, // <== ВАЖНО! Иначе сервер не получит id
+      });
+  
+      fetchMatches(); // обновляем список после удаления
     } catch (error) {
-      console.error('Ошибка при удалении матча:', error);
+      console.error('Ошибка при удалении клуба:', error);
     }
   };
 
@@ -482,17 +500,23 @@ useEffect(() => {
     value={city}
     onChange={(event) => setCity(event.target.value)}
   />
+  <TextInput
+    label="Год создания"
+    placeholder="Введите год создания"
+    value={foundationYear}
+    onChange={(event) => setFoundationYear(event.target.value)}
+  />
   <div className="flex items-center space-x-2">
-    <Select
-      label="Страна"
-      placeholder="Выберите страну"
-      data={countries.map((country) => ({
-        value: country.id,
-        label: country.countryName,
-      }))}
-      value={countryId}
-      onChange={(value) => setCountryId(value)}
-    />
+  <Select
+  label="Страна"
+  placeholder="Выберите страну"
+  data={countries.map((country) => ({
+    value: country.id,
+    label: country.countryName,
+  }))}
+  value={countryId}
+  onChange={(value) => setCountryId(value || '')} // Убедитесь, что всегда строка
+/>
     <Button
       variant="light"
       leftSection={<IconPlus size={16} />}
@@ -510,7 +534,8 @@ useEffect(() => {
         label: league.leagueName,
       }))}
       value={leagueId}
-      onChange={(value) => setLeagueId(value)}
+      onChange={(value) => setLeagueId(value || ''
+      )}
     />
     <Button
       variant="light"
@@ -622,14 +647,14 @@ useEffect(() => {
   <div className="space-y-4">
     <TextInput
       label="Сезон"
-      placeholder="Введите сезон (например, 2024/2025)"
+      placeholder="Введите сезон (например, 24/25)"
       value={season}
       onChange={(event) => setSeason(event.target.value)}
       required
     />
     <TextInput
       label="Дата матча"
-      placeholder="Введите дату матча (например, 2025-04-15)"
+      placeholder="Введите дату матча (например, 15-02-2025)"
       value={matchDate}
       onChange={(event) => setMatchDate(event.target.value)}
       required
