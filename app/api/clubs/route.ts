@@ -76,16 +76,55 @@ export async function GET(req: Request) {
 }
 
 export const POST = async(request: NextRequest)=> {
-    const {clubName,foundationYear,city,country,league} = await request.json()
+    const {clubName,foundationYear,city,countryId,leagueId} = await request.json()
 
     const data = await prisma.footballClub.create({data:{
       clubName:clubName,
       foundationYear:foundationYear,
       city:city,
-      country:country,
-      league:league,
+      countryid:countryId,
+      leagueid:leagueId,
     }})
-
+    console.log(data)
     return NextResponse.json({data},{status: 200})
-    
 }
+export const DELETE = async (req: NextRequest) => {
+  try {
+    const { id } = await req.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Не передан параметр id' },
+        { status: 400 }
+      );
+    }
+
+    // Проверяем, существует ли такой клуб
+    const existingClub = await prisma.footballClub.findUnique({
+      where: { id },
+    });
+
+    if (!existingClub) {
+      return NextResponse.json(
+        { error: 'Футбольный клуб не найден' },
+        { status: 404 }
+      );
+    }
+
+    // Удаляем клуб
+    await prisma.footballClub.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { message: 'Клуб успешно удалён', id },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Ошибка при удалении клуба:', error);
+    return NextResponse.json(
+      { error: 'Ошибка на сервере' },
+      { status: 500 }
+    );
+  }
+};

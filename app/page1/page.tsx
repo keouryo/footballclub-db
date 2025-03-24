@@ -325,27 +325,27 @@ export default function ClubSearchPage() {
   })();
   
 
-  const leagueOptions = (() => {
-    if (country) {
-      // Если выбрана страна, фильтруем лиги по стране
-      return leagues
-        .filter((l) => l.countryid === country)
-        .map((l) => ({
-          value: l.id,
-          label: l.leagueName,
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-    }
-  
-    // Если страна не выбрана, показываем все лиги
+ const leagueOptions = (() => {
+  if (country) {
+    // Если выбрана страна, фильтруем лиги по стране
     return leagues
+      .filter((l) => l.countryid === country)
       .map((l) => ({
         value: l.id,
         label: l.leagueName,
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
-  })();
-  
+  }
+
+  // Если страна не выбрана, показываем все лиги
+  return leagues
+    .map((l) => ({
+      value: l.id,
+      label: l.leagueName,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+})();
+
 
   const cityOptions = cities
     .map((cityName) => ({
@@ -465,23 +465,26 @@ export default function ClubSearchPage() {
           </div>
         ) : (
           <>
-            <div className="space-y-4">
+            
               {clubs.map((club) => (
                 <div
                   key={club.id}
                   className="flex items-center bg-gray-50 hover:bg-gray-100 transition p-4 rounded-xl shadow-sm"
                 >
                   <IconBuildingStadium className="w-12 h-12 text-gray-400 mr-6" />
-                  <div>
-                    <p className="text-lg font-semibold">{club.clubName}</p>
-                    <p className="text-sm text-gray-600">
-                      {club.league?.leagueName || 'Без лиги'} - {club.city},{' '}
-                      {club.country?.countryName || 'Без страны'} - Основан в {club.foundationYear}
+                 
+                    <p className="text-lg font-semibold">{club.clubName}
                     </p>
-                  </div>
+                    <p className="text-lg ml-2">
+                    Лига: {club.league?.leagueName || 'Без лиги'} | Город: {club.city},{' '}
+                    Страна: {club.country?.countryName || 'Без страны'} | Основан в {club.foundationYear}
+                    </p>
+                      
+                    
+                 
                 </div>
               ))}
-            </div>
+           
 
             <div className="flex justify-center mt-8">
               <Pagination
