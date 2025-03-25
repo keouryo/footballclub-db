@@ -33,7 +33,7 @@ export default function Header(){
             {/* Выпадающее меню */}
             <Menu.Dropdown>
                 {/* Элементы меню */}
-                <Menu.Item component={Link} href={'/page1'}>
+                {/* <Menu.Item component={Link} href={'/page1'}>
                 Поиск клуба по атрибутам
                 </Menu.Item>
                 <Menu.Item component={Link} href={'/searchbyleague'}>
@@ -41,6 +41,12 @@ export default function Header(){
                 </Menu.Item>
                 <Menu.Item component={Link} href={'/searchbymatch'}>
                 Поиск по матчу
+                </Menu.Item> */}
+                <Menu.Item component={Link} href={'/twoattributes'}>
+                Поиск по двум атрибутам
+                </Menu.Item>
+                <Menu.Item component={Link} href={'/oneattribute'}>
+                Поиск по одному атрибуту
                 </Menu.Item>
             </Menu.Dropdown>
         </Menu>
