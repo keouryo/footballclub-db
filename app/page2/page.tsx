@@ -30,6 +30,7 @@ interface League {
   id: string;
   leagueName: string;
   leagueLevel: string;
+  country: Country;
 }
 
 interface FootballClub {
@@ -142,7 +143,6 @@ const [countryIdForLeague, setCountryIdForLeague] = useState<string | null>(null
 const startClubIndex = (currentPage - 1) * pageSize;
 const endClubIndex = startClubIndex + pageSize;
 
-
 const handleClubSubmit = async () => {
   try {
     // Проверяем, что все обязательные поля заполнены
@@ -151,30 +151,37 @@ const handleClubSubmit = async () => {
       return;
     }
 
+    // Проверка на уникальность клуба
+    const isClubExists = footballClubs.some(
+      (club) =>
+        club.clubName.toLowerCase() === clubName.toLowerCase() &&
+        club.league.id === leagueId
+    );
+
+    if (isClubExists) {
+      alert('Клуб с таким названием уже существует в данной лиге');
+      return;
+    }
+
     // Отправляем запрос на сервер
     await CreateClub({
       clubName,
       city,
       countryId,
-      leagueId,
       foundationYear,
+      leagueId,
     });
-
     console.log('Клуб успешно создан:');
-
     // Обновляем список клубов
     fetchFootballClubs();
-
     // Очищаем форму
     setClubName('');
     setCity('');
     setFoundationYear('');
-        setCountryId('');
+    setCountryId('');
     setLeagueId('');
-
     // Закрываем модальное окно
     setClubModalOpened(false);
-
     // Уведомление об успехе
     alert('Клуб успешно создан!');
   } catch (error) {
@@ -182,44 +189,59 @@ const handleClubSubmit = async () => {
     alert('Произошла ошибка при создании клуба.');
   }
 };
-  const handleLeagueSubmit = async () => {
-    // Проверяем, что все поля заполнены
-    if (!leagueName || !leagueLevel || !countryIdForLeague) {
-      alert('Пожалуйста, заполните все поля');
-      return;
-    }
-  
-    try {
-      // Вызываем API для создания лиги
-      await CreateLeague({
-        leagueName,
-        leagueLevel,
-        countryid: countryIdForLeague,
-      });
-  
-      // Закрываем модальное окно
-      setLeagueModalOpened(false);
-  
-      // Очищаем поля формы
-      setLeagueName('');
-      setLeagueLevel('');
-      setCountryIdForLeague(null);
-  
-      // Обновляем список лиг
-      fetchLeagues();
-  
-      // Выводим уведомление об успехе
-      alert('Лига успешно создана');
-    } catch (error) {
-      console.error('Ошибка при создании лиги:', error);
-      alert('Произошла ошибка при создании лиги');
-    }
-  };
+const handleLeagueSubmit = async () => {
+  // Проверяем, что все поля заполнены
+  if (!leagueName || !leagueLevel || !countryIdForLeague) {
+    alert('Пожалуйста, заполните все поля');
+    return;
+  }
+
+  // Проверка на уникальность лиги
+  const isLeagueExists = leagues.some((league) =>
+    league.leagueName.toLowerCase() === leagueName.toLowerCase() ||
+    league.leagueLevel === leagueLevel &&
+    league.country.id === countryIdForLeague
+  );
+
+  if (isLeagueExists) {
+    alert('Лига с таким названием или уровнем уже существует в данной стране');
+    return;
+  }
+
+  try {
+    await CreateLeague({
+      leagueName,
+      leagueLevel,
+      countryid: countryIdForLeague,
+    });
+    setLeagueModalOpened(false);
+    setLeagueName('');
+    setLeagueLevel('');
+    setCountryIdForLeague(null);
+    fetchLeagues();
+    alert('Лига успешно создана');
+  } catch (error) {
+    console.error('Ошибка при создании лиги:', error);
+    alert('Произошла ошибка при создании лиги');
+  }
+};
 
   const handleCountrySubmit = async () => {
     // Проверяем, что все поля заполнены
     if (!countryName || !countryCodeShort || !continent) {
       alert('Пожалуйста, заполните все поля');
+      return;
+    }
+  
+    // Проверка на уникальность страны
+    const isCountryExists = countries.some(
+      (country) =>
+        country.countryName.toLowerCase() === countryName.toLowerCase() ||
+        country.countryCodeShort.toUpperCase() === countryCodeShort.toUpperCase()
+    );
+  
+    if (isCountryExists) {
+      alert('Страна с таким названием или кодом уже существует');
       return;
     }
   
@@ -230,18 +252,14 @@ const handleClubSubmit = async () => {
         countryCodeShort,
         continent,
       });
-  
       // Закрываем модальное окно
       setCountryModalOpened(false);
-  
       // Очищаем поля формы
       setCountryName('');
       setCountryCodeShort('');
       setContinent('');
-  
       // Выводим уведомление об успешном создании
       alert('Страна успешно создана');
-  
       // Обновляем список стран
       fetchCountries();
     } catch (error) {
@@ -270,11 +288,27 @@ const handleClubSubmit = async () => {
       alert('Пожалуйста, выберите лигу.');
       return;
     }
+    
     if (homeClub === awayClub) {
       console.error('Ошибка: Домашняя и гостевая команды должны быть разными.');
       alert('Домашняя и гостевая команды должны быть разными.');
       return;
     }
+  
+    // Проверка на уникальность матча
+    const isMatchExists = matches.some(
+      (match) =>
+        match.season === season &&
+        match.matchDate === matchDate &&
+        match.homeClub.id === homeClub &&
+        match.awayClub.id === awayClub
+    );
+  
+    if (isMatchExists) {
+      alert('Такой матч уже существует');
+      return;
+    }
+  
     try {
       await CreateMatch({
         season,
@@ -284,10 +318,8 @@ const handleClubSubmit = async () => {
         idAwayClub: awayClub,
         idHomeClub: homeClub,
       });
-  
       // Уведомление об успешном создании матча
       alert('Матч успешно создан!');
-  
       // Сброс состояний
       setMatchModalOpened(false);
       setSeason('');
