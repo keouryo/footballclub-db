@@ -52,31 +52,43 @@ export default function SearchByLeague() {
       const [countriesRes, leaguesRes] = await Promise.all([
         axios.get('/api/coutries'),
         axios.get('/api/leagues'),
-      ])
-
-      const countries: Country[] = countriesRes.data
-      const leagues: League[] = leaguesRes.data
-
-      const mappedCountries: SelectOption[] = countries.map((country) => ({
+      ]);
+  
+      const countries: Country[] = countriesRes.data;
+      const leagues: League[] = leaguesRes.data;
+  
+      // Создаем Set уникальных ID стран, у которых есть лиги
+      const countryIdsWithLeagues = new Set(
+        leagues
+          .filter((league) => league.countryid !== null)
+          .map((league) => league.countryid)
+      );
+  
+      // Фильтруем страны, оставляя только те, у которых есть лиги
+      const filteredCountries = countries.filter((country) =>
+        countryIdsWithLeagues.has(String(country.id))
+      );
+  
+      const mappedCountries: SelectOption[] = filteredCountries.map((country) => ({
         value: String(country.id),
         label: country.countryName,
-      }))
-
+      }));
+  
       const mappedLeagues: League[] = leagues.map((league) => ({
         ...league,
         id: String(league.id),
         leagueLevel: league.leagueLevel,
         countryid: league.countryid,
-      }))
-
-      setCountriesList(mappedCountries)
-      setLeaguesList(mappedLeagues)
-      setFilteredCountries(mappedCountries)
-      setFilteredLeagues(leaguesList.map(league => ({ value: league.id, label: league.leagueName })))
+      }));
+  
+      setCountriesList(mappedCountries);
+      setLeaguesList(mappedLeagues);
+      setFilteredCountries(mappedCountries); // Начальное состояние фильтрованных стран
+      setFilteredLeagues(leaguesList.map((league) => ({ value: league.id, label: league.leagueName })));
     } catch (error) {
-      console.error('Ошибка при загрузке данных', error)
+      console.error('Ошибка при загрузке данных', error);
     }
-  }
+  };
 
   const updateFilters = () => {
     if (isCountryFiltered && selectedCountry) {

@@ -48,6 +48,12 @@ export default function Header(){
                 <Menu.Item component={Link} href={'/oneattribute'}>
                 Поиск по одному атрибуту
                 </Menu.Item>
+                <Menu.Item component={Link} href={'/playername'}>
+                Поиск по имени игрока
+                </Menu.Item>
+                <Menu.Item component={Link} href={'/foundationyear'}>
+                Поиск по году создания
+                </Menu.Item>
             </Menu.Dropdown>
         </Menu>
             </div>

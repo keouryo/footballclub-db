@@ -67,6 +67,14 @@ export async function GET(req: Request) {
       clubs,
       total,
       page,
+      foundationYears: await prisma.footballClub.findMany({
+        select: { foundationYear: true },
+        distinct: ['foundationYear'],
+      }).then((years) =>
+        years
+          .map((year) => year.foundationYear) // Извлекаем года
+          .sort((a, b) => parseInt(a) - parseInt(b)) // Сортируем по возрастанию
+      ),
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
