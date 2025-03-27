@@ -61,9 +61,10 @@ export default function SearchByPlayer() {
     fetchPlayers();
   }, [fetchPlayers]);
 
-  const handleFilterChange = (value: string) => {
-    setSelectedPlayer(value);
+  const handleFilterChange = (value: string | null) => {
+    setSelectedPlayer(value ?? ''); // Если null, ставим пустую строку
   };
+  
 
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
@@ -71,7 +72,7 @@ export default function SearchByPlayer() {
 
   return (
     <div className="pt-5 pl-4 pb-6">
-      <h1 className="text-2xl font-bold mb-4">Поиск по игроку</h1>
+      <h1 className="text-2xl font-bold mb-4">Поиск футбольных игроков по фамилии</h1>
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex justify-between items-center gap-4 flex-wrap">
@@ -80,11 +81,14 @@ export default function SearchByPlayer() {
             placeholder="Выберите игрока"
             className="flex-1 min-w-[200px]"
             value={selectedPlayer}
+            withScrollArea
             onChange={handleFilterChange}
             data={players.map((player) => ({
               value: player.id,
               label: player.name,
-            }))}
+              
+            }))
+          }
           />
         </div>
       </div>

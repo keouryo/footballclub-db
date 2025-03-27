@@ -130,7 +130,7 @@ setClubs((prev) => {
 
   return (
     <div className="pt-5 pl-4 pb-6">
-      <h1 className="text-2xl font-bold mb-4">Поиск по матчу</h1>
+      <h1 className="text-2xl font-bold mb-4">Поиск по футбольному матчу</h1>
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div className="flex justify-between items-center gap-4 flex-wrap">
@@ -139,6 +139,7 @@ setClubs((prev) => {
             className="flex-1 min-w-[200px]"
             value={filters.homeClubId}
             onChange={(val) => handleFilterChange('homeClubId', val || '')}
+            withScrollArea
             data={clubs.map((c) => ({
               value: c.id,
               label: c.clubName,

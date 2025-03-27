@@ -116,44 +116,41 @@ export default function SearchByLeague() {
       setFilteredCountries(countriesList)
     }
   }
-
   const handleFilterSelection = (type: 'country' | 'league', value: string | null) => {
     if (type === 'country') {
-      // При выборе страны очищаем лигу и обновляем флаг фильтрации
       setSelectedCountry(value)
-      setSelectedLeague(null)
-      setIsCountryFiltered(true)
-      setIsLeagueFiltered(false) // Сбрасываем фильтр лиг
+      setSelectedLeague(null) // Очищаем лигу при смене страны
+      setIsCountryFiltered(!!value)
+      setIsLeagueFiltered(false) // Сбрасываем фильтр по лигам
+  
       if (value) {
+        // Фильтруем лиги только если выбрана страна
         setFilteredLeagues(
           leaguesList
             .filter(league => league.countryid === value)
             .map(league => ({ value: league.id, label: league.leagueName }))
         )
       } else {
+        // Если страна не выбрана, показываем все лиги
         setFilteredLeagues(leaguesList.map(league => ({ value: league.id, label: league.leagueName })))
       }
     } else if (type === 'league') {
-      // При выборе лиги очищаем страну и обновляем флаг фильтрации
       setSelectedLeague(value)
-      setIsLeagueFiltered(true)
-      setIsCountryFiltered(false) // Сбрасываем фильтр стран
+      setIsLeagueFiltered(!!value)
+  
       if (value) {
         const league = leaguesList.find(league => league.id === value)
-        if (league && league.countryid) {
-          setSelectedCountry(league.countryid)
-          setFilteredCountries(countriesList.filter(country => country.value === league.countryid))
-        } else {
-          setSelectedCountry(null)
-          setFilteredCountries([])
+        if (league?.countryid) {
+          setSelectedCountry(league.countryid) // Автоматически ставим страну выбранной лиги
         }
-      } else {
-        setSelectedCountry(null)
-        setFilteredCountries(countriesList)
       }
     }
   }
-
+  
+  
+  
+  
+  
   const handleSearch = async () => {
     setIsLoading(true)
 
@@ -183,16 +180,18 @@ export default function SearchByLeague() {
           <Select
             placeholder="Выбрать страну"
             className="flex-1 min-w-[200px]"
-            data={isCountryFiltered ? filteredCountries : countriesList}
+            data={ countriesList}
             value={selectedCountry}
             onChange={(val) => handleFilterSelection('country', val || null)}
+            withScrollArea
           />
           <Select
             placeholder="Выбрать лигу"
             className="flex-1 min-w-[200px]"
-            data={isCountryFiltered ? filteredLeagues : leaguesList.map(league => ({ value: league.id, label: league.leagueName }))}
+            data={filteredLeagues}
             value={selectedLeague}
             onChange={(val) => handleFilterSelection('league', val || null)}
+            withScrollArea
           />
         </div>
       </div>
