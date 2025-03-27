@@ -56,11 +56,11 @@ export default function SearchClubs() {
   useEffect(() => {
     fetchClubs();
   }, [filters]);
-
-  const handleFoundationYearChange = (value: string) => {
-    setFoundationYear(value);
-    setFilters((prev) => ({ ...prev, foundationYear: value, page: 1 }));
+  const handleFoundationYearChange = (value: string | null) => {
+    setFoundationYear(value ?? ''); // Если null, ставим пустую строку
+    setFilters((prev) => ({ ...prev, foundationYear: value ?? '', page: 1 }));
   };
+  
 
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
@@ -68,7 +68,7 @@ export default function SearchClubs() {
 
   return (
     <div className="pt-5 pl-4 pb-6">
-      <h1 className="text-2xl font-bold mb-4">Поиск клубов по году основания</h1>
+      <h1 className="text-2xl font-bold mb-4">Поиск футбольных клубов по году основания</h1>
 
       <div className="bg-white shadow-md p-4 rounded-lg space-y-4">
         <div>
@@ -76,6 +76,8 @@ export default function SearchClubs() {
             id="foundationYear"
             value={foundationYear}
             onChange={handleFoundationYearChange}
+            withScrollArea
+
             placeholder="Выберите год основания"
             data={foundationYears.map((year) => ({ value: year, label: year }))}
             classNames={{

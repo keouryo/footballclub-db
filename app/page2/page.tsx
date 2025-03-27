@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+
 interface Country {
   id: string;
   countryName: string;
@@ -198,8 +199,8 @@ const handleLeagueSubmit = async () => {
 
   // Проверка на уникальность лиги
   const isLeagueExists = leagues.some((league) =>
-    league.leagueName.toLowerCase() === leagueName.toLowerCase() ||
-    league.leagueLevel === leagueLevel &&
+    (league.leagueName.toLowerCase() === leagueName.toLowerCase() ||
+    league.leagueLevel === leagueLevel ) &&
     league.country.id === countryIdForLeague
   );
 
