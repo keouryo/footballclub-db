@@ -14,12 +14,20 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import axios from "axios";
-import Image from "next/image";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from "chart.js";
+import { Pie, Bar } from "react-chartjs-2";
 import React from "react";
 
-// --- Типы данных ---
-// Страна и связанные с ней данные
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+
 export interface CountryData {
   countryName: string;
   _count: {
@@ -29,7 +37,7 @@ export interface CountryData {
   leagues: LeagueData[];
 }
 
-// Лига и связанные с ней данные
+
 export interface LeagueData {
   leagueName: string;
   _count: {
@@ -37,26 +45,26 @@ export interface LeagueData {
   };
 }
 
-// Статистика по игрокам
+
 export interface PlayersStats {
   _count: {
     id: number;
   };
 }
 
-// Молодой игрок
+
 export interface YoungestPlayer {
   name: string;
   birthdayDate: string;
 }
 
-// Молодой клуб
+
 export interface YoungestClub {
   clubName: string;
   foundationYear: string;
 }
 
-// Матч с последней датой или наибольшим счётом
+
 export interface MatchInfo {
   homeClub: {
     clubName: string;
@@ -68,7 +76,7 @@ export interface MatchInfo {
   matchDate: string;
 }
 
-// Итоговый тип ответа сервера
+
 export interface StatisticsResponse {
   countriesData: CountryData[];
   playersStats: PlayersStats;
@@ -79,7 +87,7 @@ export interface StatisticsResponse {
   highestScoreMatch: MatchInfo | null;
 }
 
-// --- Компонент ---
+
 const Home: React.FC = () => {
 
   const { data: response }: UseQueryResult<StatisticsResponse> = useQuery({
@@ -103,76 +111,80 @@ const Home: React.FC = () => {
     highestScoreMatch
   } = response;
 
-  // Таблица стран
-  const countryRows = countriesData.map((item: CountryData) => (
-    <Table.Tr key={item.countryName}>
-      <Table.Td className="font-medium">{item.countryName}</Table.Td>
-      <Table.Td>{item._count.footballClubs}</Table.Td>
-    </Table.Tr>
-  ));
 
-  // Таблица лиг
-  const leagueRows = countriesData.flatMap((item: CountryData) =>
-    item.leagues.map((league: LeagueData) => (
-      <Table.Tr key={league.leagueName}>
-        <Table.Td className="font-medium">{league.leagueName}</Table.Td>
-        <Table.Td>{league._count.footballClubs}</Table.Td>
-      </Table.Tr>
-    ))
-  );
+const filteredCountries = countriesData
+  .filter(c => c._count.footballClubs > 0)
+  .sort((a, b) => b._count.footballClubs - a._count.footballClubs);
+
+const countryChartData = {
+  labels: filteredCountries.map(c => c.countryName),
+  datasets: [
+    {
+      label: "Количество клубов",
+      data: filteredCountries.map(c => c._count.footballClubs),
+      backgroundColor: [
+        "#4ade80",
+        "#60a5fa",
+        "#fbbf24",
+        "#f87171",
+        "#a78bfa",
+        "#34d399",
+        "#f472b6",
+        "#38bdf8",
+      ],
+    },
+  ],
+};
+
+
+const leagueData = countriesData.flatMap(c => 
+  c.leagues.map(l => ({
+    leagueName: l.leagueName,
+    footballClubs: l._count.footballClubs,
+  }))
+);
+
+
+const filteredLeagues = leagueData
+  .filter(l => l.footballClubs > 0)
+  .sort((a, b) => b.footballClubs - a.footballClubs);
+
+const leagueChartData = {
+  labels: filteredLeagues.map(l => l.leagueName),
+  datasets: [
+    {
+      label: "Клубов в лиге",
+      data: filteredLeagues.map(l => l.footballClubs),
+      backgroundColor: "#60a5fa",
+    },
+  ],
+};
+
 
   return (
     <div className="pt-5 pl-4">
-      {/* Заголовок */}
       <div className="text-2xl flex justify-center">
-        <h1>Статистика по клубам и лигам:</h1>
+        <h1>Статистика по клубам и лигам</h1>
       </div>
-
-      {/* Блок статистики по странам и лигам */}
-      <div className="flex justify-center mt-8">
-        {/* Таблица со странами */}
-        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md h-auto">
-          <div className="flex items-center mb-6">
-            <IconFlag />
-            <Title order={3} className="ml-2">
-              Статистика по странам:
-            </Title>
-          </div>
-
-          <Table striped highlightOnHover withTableBorder withColumnBorders >
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Страна</Table.Th>
-                <Table.Th>Количество клубов</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>{countryRows}</Table.Tbody>
-          </Table>
-        </div>
-
-        {/* Таблица с лигами */}
-        <div className="w-1/2 p-4 bg-white rounded-lg shadow-md ml-4">
+      <div className="flex flex-wrap justify-center gap-6">
+        <div className="w-full md:w-[45%] bg-white rounded-2xl shadow-lg p-6">
           <div className="flex items-center mb-4">
-            <IconTrophy className="mr-2" />
-            <Title order={3} className="ml-2">
-              Статистика по лигам:
-            </Title>
+            <IconFlag className="text-green-500 mr-2" />
+            <h2 className="text-xl font-semibold">Распределение клубов по странам</h2>
           </div>
+          <Pie data={countryChartData} width={150} height={150} />
+        </div>
 
-          <Table striped highlightOnHover withTableBorder withColumnBorders>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Лига</Table.Th>
-                <Table.Th>Количество клубов</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>{leagueRows}</Table.Tbody>
-          </Table>
+        <div className="w-full md:w-[45%] bg-white rounded-2xl shadow-lg p-6 ">
+          <div className="flex items-center mb-4">
+            <IconTrophy className="text-yellow-500 mr-2" />
+            <h2 className="text-xl font-semibold">Клубы по лигам</h2>
+          </div>
+          <Bar data={leagueChartData} height={300} />
         </div>
       </div>
 
-      {/* Блок статистики по игрокам */}
-      <div className="text-2xl ml-5 mt-5 bg-white rounded-lg shadow-md p-4">
+            <div className="text-2xl ml-5 mt-5 bg-white rounded-lg shadow-md p-4">
         <div className="flex items-center mb-4">
           <IconShirtSport className="mr-2" />
           <h1>Статистика по игрокам</h1>
@@ -204,15 +216,13 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Блок ключевой информации */}
-      <div className="text-2xl ml-5 mt-5 bg-white rounded-lg shadow-md p-4">
+            <div className="text-2xl ml-5 mt-5 bg-white rounded-lg shadow-md p-4">
         <div className="flex items-center mb-4">
           <IconBellHeart className="mr-2" />
           <h1>Ключевая информация</h1>
         </div>
         <div className="flex justify-between">
-          {/* Самый молодой игрок */}
-          <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
+                    <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
             <p className="ml-2 text-2xl text-center">Самый молодой игрок</p>
             <div className="flex items-center">
               <IconBabyCarriageFilled className="size-10" />
@@ -225,8 +235,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Самый молодой клуб */}
-          <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
+                    <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
             <h2 className="text-2xl text-center">Самый молодой клуб</h2>
             <div className="flex items-center">
               <IconShieldHalfFilled className="size-10" />
@@ -239,8 +248,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Последний матч */}
-          <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
+                    <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
             <h2 className="text-2xl text-center">Последний матч</h2>
             <div className="flex items-center">
               <IconSoccerField className="size-10" />
@@ -255,8 +263,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Наибольший счет */}
-          <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
+                    <div className="p-4 bg-white rounded-lg shadow-md mr-4 w-1/4">
             <h2 className="text-2xl text-center">Наибольший счет</h2>
             <div className="flex items-center">
               <IconScoreboard className="size-10" />
